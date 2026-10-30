@@ -1,6 +1,6 @@
 {
-  "appId": "com.fm26.dynastymanager",
-  "appName": "FM Dynasty Manager",
+  "appId": "com.fm26.worlddynasty",
+  "appName": "Football Manager 26",
   "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
