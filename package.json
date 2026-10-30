@@ -1,7 +1,7 @@
 {
-  "name": "football-manager-dynasty",
-  "version": "1.0.0",
-  "description": "Complete Offline Football Manager & Database Editor for Android",
+  "name": "football-manager-26-world",
+  "version": "2.0.0",
+  "description": "Complete Offline World Football Manager & Database Studio for Android",
   "main": "www/index.html",
   "scripts": {
     "build": "echo 'Static build ready'"
