@@ -1,0 +1,16 @@
+{
+  "name": "football-manager-dynasty",
+  "version": "1.0.0",
+  "description": "Complete Offline Football Manager & Database Editor for Android",
+  "main": "www/index.html",
+  "scripts": {
+    "build": "echo 'Static build ready'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
