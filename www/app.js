@@ -1,533 +1,799 @@
-/* FM DYNASTY MANAGER 26 - COMPLETE ENGINE & BUILT-IN DATABASE EDITOR */
-const STORAGE_KEY = "FM26_DYNASTY_SAVE_V1";
-const DB_SLOTS_KEY = "FM26_DYNASTY_SLOTS_V1";
-const CUSTOM_DB_KEY = "FM26_CUSTOM_DBS_V1";
+/* ============================================================================
+   FOOTBALL MANAGER 26 - COMPLETE WORLD DATABASE, MULTI-COMPETITION VIEWER,
+   EXACT GRAPHICS UI, LIVE MATCH ENGINE & BUILT-IN EDITOR
+   ============================================================================ */
+const SAVE_KEY = "FM26_WORLD_SAVE_V2";
+const SLOTS_KEY = "FM26_WORLD_SLOTS_V2";
 
-const FAKE_NAMES = {
-  England: { first: ["Harry", "Jude", "Bukayo", "Cole", "Declan", "Phil", "Ollie", "Kobbie", "Trent", "Marc"], last: ["Walker", "Bellingham", "Palmer", "Rice", "Foden", "Watkins", "Saka", "Mainoo", "Guehi", "Gordon"] },
-  Spain: { first: ["Lamine", "Pedri", "Rodri", "Gavi", "Nico", "Dani", "Alvaro", "Unai", "Pau", "Mikel"], last: ["Yamal", "Gonzalez", "Hernandez", "Williams", "Olmo", "Morata", "Simon", "Cubarsi", "Merino", "Ruiz"] },
-  Algeria: { first: ["Riyad", "Ismael", "Amine", "Ramy", "Yacine", "Houssem", "Said", "Baghdad", "Aissa", "Youcef"], last: ["Mahrez", "Bennacer", "Gouiri", "Bensebaini", "Brahimi", "Aouar", "Benrahma", "Bounedjah", "Mandi", "Atal"] },
-  Brazil: { first: ["Vinicius", "Rodrygo", "Endrick", "Bruno", "Gabriel", "Lucas", "Raphinha", "Gleison", "Ederson", "Marquinhos"], last: ["Junior", "Goes", "Guimaraes", "Magalhaes", "Paqueta", "Dias", "Bremer", "Moraes", "Silva", "Savinho"] },
-  France: { first: ["Kylian", "Antoine", "William", "Aurelien", "Eduardo", "Ousmane", "Mike", "Theo", "Warren", "Bradley"], last: ["Mbappe", "Griezmann", "Saliba", "Tchouameni", "Camavinga", "Dembele", "Maignan", "Hernandez", "Zaire", "Barcola"] }
-};
+/* REAL WORLD LEAGUES & EXACT REAL CLUB COUNTS ACROSS 8 NATIONS */
+const WORLD_LEAGUE_DATA = [
+  {
+    id: "eng_1", name: "English Premier Division", country: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", tier: 1, promo: 0, rel: 3,
+    clubs: [
+      ["Manchester Blue", "MCI", "#38bdf8", "#ffffff", "stripes", "Etihad Arena", 53400, 120000000, 94, "The Citizens", 1880, 10, 1, 8],
+      ["Liverpool Red", "LIV", "#dc2626", "#ffffff", "solid", "Anfield Ground", 61276, 95000000, 92, "The Reds", 1892, 19, 6, 8],
+      ["Manchester Red", "MUN", "#ef4444", "#ffffff", "solid", "Red Arena", 74300, 105000000, 90, "The Reds", 1878, 20, 3, 12],
+      ["Arsenal Red", "ARS", "#ef4444", "#f8fafc", "sleeves", "Emirates Stadium", 60704, 98000000, 91, "The Gunners", 1886, 13, 0, 14],
+      ["Chelsea Blue", "CHE", "#1d4ed8", "#ffffff", "solid", "Stamford Bridge", 40341, 110000000, 88, "The Blues", 1905, 6, 2, 8],
+      ["Tottenham Hotspur", "TOT", "#f8fafc", "#1e293b", "solid", "Hotspur Stadium", 62850, 82000000, 86, "Spurs", 1882, 2, 0, 8],
+      ["Aston Claret", "AVL", "#7c2d12", "#38bdf8", "sleeves", "Villa Park", 42657, 72000000, 85, "The Villans", 1874, 7, 1, 7],
+      ["Newcastle White & Black", "NEW", "#111827", "#f8fafc", "stripes", "St James' Park", 52305, 88000000, 86, "The Magpies", 1892, 4, 0, 6],
+      ["West Ham Claret", "WHU", "#7f1d1d", "#38bdf8", "sleeves", "London Stadium", 62500, 58000000, 81, "The Hammers", 1895, 0, 0, 3],
+      ["Brighton Seagulls", "BHA", "#0284c7", "#ffffff", "stripes", "Amex Stadium", 31876, 54000000, 81, "The Seagulls", 1901, 0, 0, 0],
+      ["Crystal Palace", "CRY", "#1d4ed8", "#dc2626", "stripes", "Selhurst Park", 25486, 45000000, 78, "The Eagles", 1905, 0, 0, 0],
+      ["Brentford Bees", "BRE", "#dc2626", "#ffffff", "stripes", "Gtech Stadium", 17250, 42000000, 78, "The Bees", 1889, 0, 0, 0],
+      ["Fulham Whites", "FUL", "#f8fafc", "#111827", "solid", "Craven Cottage", 25700, 44000000, 78, "The Cottagers", 1879, 0, 0, 0],
+      ["Wolverhampton Gold", "WOL", "#f59e0b", "#111827", "solid", "Molineux", 31750, 46000000, 78, "Wolves", 1877, 3, 0, 4],
+      ["Everton Blue", "EVE", "#1e40af", "#ffffff", "solid", "Goodison Park", 39414, 38000000, 79, "The Toffees", 1878, 9, 0, 5],
+      ["Bournemouth Cherries", "BOU", "#dc2626", "#111827", "stripes", "Vitality Stadium", 11307, 40000000, 77, "The Cherries", 1899, 0, 0, 0],
+      ["Nottingham Forest", "NFO", "#dc2626", "#ffffff", "solid", "City Ground", 30445, 48000000, 79, "The Tricky Trees", 1865, 1, 2, 2],
+      ["Leicester Blue", "LEI", "#1d4ed8", "#facc15", "solid", "King Power", 32261, 36000000, 77, "The Foxes", 1884, 1, 0, 1],
+      ["Ipswich Town", "IPS", "#2563eb", "#ffffff", "solid", "Portman Road", 30014, 32000000, 75, "Tractor Boys", 1878, 1, 0, 1],
+      ["Southampton Saints", "SOU", "#dc2626", "#ffffff", "stripes", "St Mary's", 32384, 34000000, 76, "The Saints", 1885, 0, 0, 1]
+    ]
+  },
+  {
+    id: "eng_2", name: "English Championship (24 Clubs)", country: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", tier: 2, promo: 3, rel: 3,
+    clubs: [
+      ["Leeds Whites", "LEE", "#f8fafc", "#facc15", "solid", "Elland Road", 37608, 30000000, 76, "The Whites", 1919, 3, 0, 1],
+      ["Burnley Clarets", "BUR", "#7f1d1d", "#38bdf8", "sleeves", "Turf Moor", 21944, 26000000, 75, "The Clarets", 1882, 2, 0, 1],
+      ["Sheffield Blades", "SHU", "#dc2626", "#ffffff", "stripes", "Bramall Lane", 32050, 24000000, 74, "The Blades", 1889, 1, 0, 4],
+      ["Sunderland Black Cats", "SUN", "#dc2626", "#ffffff", "stripes", "Stadium of Light", 49000, 22000000, 74, "Black Cats", 1879, 6, 0, 2],
+      ["West Bromwich", "WBA", "#1e3a8a", "#ffffff", "stripes", "The Hawthorns", 26850, 20000000, 73, "The Baggies", 1878, 1, 0, 5],
+      ["Norwich Canaries", "NOR", "#facc15", "#16a34a", "solid", "Carrow Road", 27359, 21000000, 73, "The Canaries", 1902, 0, 0, 0],
+      ["Middlesbrough Red", "MID", "#dc2626", "#ffffff", "hoops", "Riverside", 34742, 19000000, 73, "Boro", 1876, 0, 0, 0],
+      ["Coventry Sky Blues", "COV", "#38bdf8", "#ffffff", "stripes", "CBS Arena", 32609, 18000000, 72, "Sky Blues", 1883, 0, 0, 1],
+      ["Luton Hatters", "LUT", "#f97316", "#1e293b", "solid", "Kenilworth Road", 11800, 22000000, 73, "The Hatters", 1885, 0, 0, 0],
+      ["Watford Hornets", "WAT", "#facc15", "#111827", "stripes", "Vicarage Road", 22200, 18000000, 72, "The Hornets", 1881, 0, 0, 0],
+      ["Hull Tigers", "HUL", "#f59e0b", "#111827", "stripes", "MKM Stadium", 25586, 17000000, 71, "The Tigers", 1904, 0, 0, 0],
+      ["Stoke Potters", "STK", "#dc2626", "#ffffff", "stripes", "bet365 Stadium", 30089, 17000000, 71, "The Potters", 1863, 0, 0, 0],
+      ["Swansea Swans", "SWA", "#f8fafc", "#111827", "solid", "Swansea.com", 21088, 15000000, 70, "The Swans", 1912, 0, 0, 0],
+      ["Blackburn Rovers", "ROV", "#2563eb", "#ffffff", "halves", "Ewood Park", 31367, 15000000, 71, "Rovers", 1875, 3, 0, 6],
+      ["Bristol Robins", "BRC", "#dc2626", "#ffffff", "solid", "Ashton Gate", 27000, 15000000, 70, "The Robins", 1894, 0, 0, 0],
+      ["Cardiff Bluebirds", "CAR", "#1d4ed8", "#ffffff", "solid", "Cardiff City", 33280, 15000000, 70, "Bluebirds", 1899, 0, 0, 1],
+      ["Millwall Lions", "MIL", "#1e3a8a", "#ffffff", "solid", "The Den", 20146, 14000000, 69, "The Lions", 1885, 0, 0, 0],
+      ["Preston North End", "PNE", "#f8fafc", "#1e3a8a", "solid", "Deepdale", 23404, 14000000, 69, "Lilywhites", 1880, 2, 0, 2],
+      ["QPR Hoops", "QPR", "#2563eb", "#ffffff", "hoops", "Loftus Road", 18439, 14000000, 69, "The R's", 1882, 0, 0, 0],
+      ["Sheffield Wednesday", "SHW", "#2563eb", "#ffffff", "stripes", "Hillsborough", 39732, 15000000, 70, "The Owls", 1867, 4, 0, 3],
+      ["Plymouth Argyle", "PLY", "#15803d", "#ffffff", "solid", "Home Park", 17900, 12000000, 68, "The Pilgrims", 1886, 0, 0, 0],
+      ["Derby Rams", "DER", "#f8fafc", "#111827", "solid", "Pride Park", 32956, 15000000, 70, "The Rams", 1884, 2, 0, 1],
+      ["Portsmouth Pompey", "POR", "#1d4ed8", "#ffffff", "solid", "Fratton Park", 20899, 14000000, 69, "Pompey", 1898, 2, 0, 2],
+      ["Oxford United", "OXF", "#facc15", "#1e3a8a", "solid", "Kassam Stadium", 12500, 11000000, 67, "The U's", 1893, 0, 0, 0]
+    ]
+  },
+  {
+    id: "esp_1", name: "Spanish La Liga (20 Clubs)", country: "Spain", flag: "🇪🇸", tier: 1, promo: 0, rel: 3,
+    clubs: [
+      ["Real Madrid", "RMA", "#f8fafc", "#facc15", "solid", "Santiago Bernabeu", 83186, 140000000, 96, "Los Blancos", 1902, 36, 15, 20],
+      ["FC Barcelona", "BAR", "#1d4ed8", "#dc2626", "stripes", "Camp Nou", 99354, 110000000, 93, "Blaugrana", 1899, 27, 5, 31],
+      ["Atletico Madrid", "ATM", "#dc2626", "#ffffff", "stripes", "Metropolitano", 70460, 88000000, 89, "Colchoneros", 1903, 11, 0, 10],
+      ["Athletic Bilbao", "ATH", "#dc2626", "#ffffff", "stripes", "San Mames", 53289, 60000000, 84, "Los Leones", 1898, 8, 0, 24],
+      ["Real Sociedad", "RSO", "#2563eb", "#ffffff", "stripes", "Anoeta", 39500, 58000000, 84, "Txuri-urdin", 1909, 2, 0, 3],
+      ["Real Betis", "BET", "#16a34a", "#ffffff", "stripes", "Benito Villamarin", 60721, 50000000, 82, "Los Verdiblancos", 1907, 1, 0, 3],
+      ["Villarreal Yellow", "VIL", "#facc15", "#1e3a8a", "solid", "La Ceramica", 23008, 52000000, 83, "Yellow Submarine", 1923, 0, 0, 0],
+      ["Valencia Bats", "VAL", "#f8fafc", "#111827", "solid", "Mestalla", 49430, 40000000, 80, "Los Che", 1919, 6, 0, 8],
+      ["Sevilla Nervion", "SEV", "#f8fafc", "#dc2626", "solid", "Ramon Sanchez", 43883, 45000000, 81, "Sevillistas", 1890, 1, 0, 5],
+      ["Girona Red-White", "GIR", "#dc2626", "#ffffff", "stripes", "Montilivi", 14624, 48000000, 82, "Blanquivermells", 1930, 0, 0, 0],
+      ["Celta Vigo", "CEL", "#38bdf8", "#ffffff", "solid", "Balaidos", 29000, 35000000, 78, "Os Celestes", 1923, 0, 0, 0],
+      ["CA Osasuna", "OSA", "#dc2626", "#1e3a8a", "solid", "El Sadar", 23576, 32000000, 78, "Los Rojillos", 1920, 0, 0, 0],
+      ["RCD Mallorca", "MLL", "#dc2626", "#111827", "solid", "Son Moix", 23142, 30000000, 77, "Los Bermellones", 1916, 0, 0, 1],
+      ["Rayo Vallecano", "RAY", "#f8fafc", "#dc2626", "sash", "Vallecas", 14708, 28000000, 76, "Los Franjirrojos", 1924, 0, 0, 0],
+      ["Getafe Blue", "GET", "#1d4ed8", "#ffffff", "solid", "Coliseum", 16500, 30000000, 77, "Azulones", 1983, 0, 0, 0],
+      ["Deportivo Alaves", "ALA", "#2563eb", "#ffffff", "stripes", "Mendizorrotza", 19840, 26000000, 75, "Babazorros", 1921, 0, 0, 0],
+      ["UD Las Palmas", "LPA", "#facc15", "#2563eb", "solid", "Gran Canaria", 32400, 26000000, 75, "Pio-Pio", 1949, 0, 0, 0],
+      ["CD Leganes", "LEG", "#2563eb", "#ffffff", "stripes", "Butarque", 12454, 24000000, 74, "Pepineros", 1928, 0, 0, 0],
+      ["RCD Espanyol", "ESP", "#2563eb", "#ffffff", "stripes", "RCDE Stadium", 40000, 28000000, 76, "Periquitos", 1900, 0, 0, 4],
+      ["Real Valladolid", "VLD", "#7e22ce", "#ffffff", "stripes", "Jose Zorrilla", 27618, 25000000, 74, "Pucela", 1928, 0, 0, 0]
+    ]
+  },
+  {
+    id: "ita_1", name: "Italian Serie A (20 Clubs)", country: "Italy", flag: "🇮🇹", tier: 1, promo: 0, rel: 3,
+    clubs: [
+      ["Inter Milano", "INT", "#1d4ed8", "#111827", "stripes", "San Siro", 75817, 100000000, 92, "Nerazzurri", 1908, 20, 3, 9],
+      ["AC Milan", "MIL", "#dc2626", "#111827", "stripes", "San Siro", 75817, 92000000, 90, "Rossoneri", 1899, 19, 7, 5],
+      ["Juventus Torino", "JUV", "#111827", "#ffffff", "stripes", "Allianz Stadium", 41507, 96000000, 90, "Bianconeri", 1897, 36, 2, 15],
+      ["Napoli Azure", "NAP", "#38bdf8", "#ffffff", "solid", "Diego Maradona", 54726, 84000000, 88, "Partenopei", 1926, 3, 0, 6],
+      ["Atalanta Bergamo", "ATA", "#1d4ed8", "#111827", "stripes", "Gewiss Stadium", 24950, 70000000, 86, "La Dea", 1907, 0, 0, 1],
+      ["AS Roma", "ROM", "#991b1b", "#f59e0b", "solid", "Stadio Olimpico", 70634, 68000000, 85, "Giallorossi", 1927, 3, 0, 9],
+      ["SS Lazio", "LAZ", "#38bdf8", "#ffffff", "solid", "Stadio Olimpico", 70634, 62000000, 84, "Biancocelesti", 1900, 2, 0, 7],
+      ["Fiorentina Viola", "FIO", "#7e22ce", "#ffffff", "solid", "Artemio Franchi", 43147, 55000000, 83, "La Viola", 1926, 2, 0, 6],
+      ["Bologna Rossoblu", "BOL", "#991b1b", "#1e3a8a", "stripes", "Renato Dall'Ara", 36462, 50000000, 82, "Rossoblu", 1909, 7, 0, 2],
+      ["Torino Granata", "TOR", "#7f1d1d", "#ffffff", "solid", "Olimpico Torino", 27958, 42000000, 79, "Il Toro", 1906, 7, 0, 5],
+      ["Udinese Friuli", "UDI", "#111827", "#ffffff", "stripes", "Bluenergy", 25144, 35000000, 77, "Zebrette", 1896, 0, 0, 0],
+      ["Genoa Grifone", "GEN", "#991b1b", "#1e3a8a", "halves", "Luigi Ferraris", 36599, 34000000, 77, "Il Grifone", 1893, 9, 0, 1],
+      ["Hellas Verona", "VER", "#1e3a8a", "#facc15", "solid", "Marcantonio", 31045, 28000000, 75, "Gialloblu", 1903, 1, 0, 0],
+      ["Como Lariani", "COM", "#2563eb", "#ffffff", "solid", "Giuseppe Sinigaglia", 13602, 45000000, 76, "I Lariani", 1907, 0, 0, 0],
+      ["Empoli Azzurri", "EMP", "#2563eb", "#ffffff", "solid", "Carlo Castellani", 16284, 26000000, 74, "Azzurri", 1920, 0, 0, 0],
+      ["Cagliari Sardinia", "CAG", "#991b1b", "#1e3a8a", "halves", "Unipol Domus", 16416, 28000000, 75, "Isolani", 1920, 1, 0, 0],
+      ["Parma Ducali", "PAR", "#facc15", "#1e3a8a", "hoops", "Ennio Tardini", 22352, 32000000, 75, "I Crociati", 1913, 0, 0, 3],
+      ["US Lecce", "LEC", "#facc15", "#dc2626", "stripes", "Via del Mare", 31533, 25000000, 74, "Salentini", 1908, 0, 0, 0],
+      ["Venezia Lagunari", "VEN", "#f97316", "#15803d", "stripes", "Pier Luigi Penzo", 11150, 24000000, 73, "Arancioneroverdi", 1907, 0, 0, 1],
+      ["AC Monza", "MON", "#dc2626", "#ffffff", "solid", "U-Power Stadium", 16917, 30000000, 75, "Brianzoli", 1912, 0, 0, 0]
+    ]
+  },
+  {
+    id: "ger_1", name: "German Bundesliga (18 Clubs)", country: "Germany", flag: "🇩🇪", tier: 1, promo: 0, rel: 2,
+    clubs: [
+      ["Bayern Munchen", "BAY", "#dc2626", "#ffffff", "solid", "Allianz Arena", 75024, 130000000, 94, "Der FCB", 1900, 33, 6, 20],
+      ["Bayer Leverkusen", "LEV", "#dc2626", "#111827", "stripes", "BayArena", 30210, 95000000, 91, "Werkself", 1904, 1, 0, 2],
+      ["Borussia Dortmund", "BVB", "#facc15", "#111827", "solid", "Signal Iduna Park", 81365, 92000000, 90, "Die Borussen", 1909, 8, 1, 5],
+      ["RB Leipzig", "RBL", "#f8fafc", "#dc2626", "solid", "Red Bull Arena", 47069, 85000000, 87, "Die Roten Bullen", 2009, 0, 0, 2],
+      ["VfB Stuttgart", "STU", "#f8fafc", "#dc2626", "hoops", "MHPArena", 60058, 62000000, 84, "Die Schwaben", 1893, 5, 0, 3],
+      ["Eintracht Frankfurt", "SGE", "#dc2626", "#111827", "stripes", "Deutsche Bank Park", 58000, 58000000, 83, "Die Adler", 1899, 1, 0, 5],
+      ["TSG Hoffenheim", "TSG", "#2563eb", "#ffffff", "solid", "PreZero Arena", 30150, 44000000, 79, "Kraichgauer", 1899, 0, 0, 0],
+      ["SC Freiburg", "SCF", "#dc2626", "#111827", "stripes", "Europa-Park", 34700, 46000000, 80, "Breisgau", 1904, 0, 0, 0],
+      ["Heidenheim Red", "HDH", "#dc2626", "#2563eb", "solid", "Voith-Arena", 15000, 30000000, 76, "FCH", 1846, 0, 0, 0],
+      ["Werder Bremen", "SVW", "#16a34a", "#ffffff", "solid", "Weserstadion", 42100, 38000000, 78, "Die Werderaner", 1899, 4, 0, 6],
+      ["VfL Wolfsburg", "WOB", "#22c55e", "#ffffff", "solid", "Volkswagen Arena", 30000, 52000000, 80, "Die Wolfe", 1945, 1, 0, 1],
+      ["FC Augsburg", "FCA", "#f8fafc", "#16a34a", "solid", "WWK Arena", 30660, 34000000, 76, "Fuggerstadter", 1907, 0, 0, 0],
+      ["Borussia M'gladbach", "BMG", "#f8fafc", "#111827", "solid", "Borussia-Park", 54042, 42000000, 79, "Die Fohlen", 1900, 5, 0, 3],
+      ["Mainz Carnival", "M05", "#dc2626", "#ffffff", "solid", "Mewa Arena", 33305, 34000000, 77, "Nullfunfer", 1905, 0, 0, 0],
+      ["Union Berlin", "FCU", "#dc2626", "#ffffff", "solid", "Alte Forsterei", 22012, 36000000, 77, "Die Eisernen", 1966, 0, 0, 0],
+      ["VfL Bochum", "BOC", "#2563eb", "#ffffff", "solid", "Vonovia Ruhrstadion", 26000, 26000000, 74, "Die Unabsteigbaren", 1848, 0, 0, 0],
+      ["FC St. Pauli", "STP", "#7c2d12", "#ffffff", "solid", "Millerntor", 29546, 25000000, 74, "Kiezkicker", 1910, 0, 0, 0],
+      ["Holstein Kiel", "KIE", "#2563eb", "#dc2626", "solid", "Holstein-Stadion", 15034, 22000000, 72, "Die Storche", 1900, 1, 0, 0]
+    ]
+  },
+  {
+    id: "fra_1", name: "French Ligue 1 (18 Clubs)", country: "France", flag: "🇫🇷", tier: 1, promo: 0, rel: 2,
+    clubs: [
+      ["Paris SG", "PSG", "#1e3a8a", "#dc2626", "stripes", "Parc des Princes", 47929, 135000000, 93, "Les Parisiens", 1970, 12, 0, 15],
+      ["AS Monaco", "ASM", "#dc2626", "#ffffff", "sash", "Stade Louis II", 16360, 75000000, 85, "Les Monegasques", 1924, 8, 0, 5],
+      ["Olympique Marseille", "OMA", "#f8fafc", "#38bdf8", "solid", "Stade Velodrome", 67394, 72000000, 85, "Les Phoceens", 1899, 9, 1, 10],
+      ["Lille Dogues", "LIL", "#dc2626", "#1e3a8a", "solid", "Pierre-Mauroy", 50186, 60000000, 83, "Les Dogues", 1944, 4, 0, 6],
+      ["OGC Nice", "NIC", "#dc2626", "#111827", "stripes", "Allianz Riviera", 36178, 55000000, 82, "Les Aiglons", 1904, 4, 0, 3],
+      ["Olympique Lyon", "OLY", "#f8fafc", "#1d4ed8", "hoops", "Groupama Stadium", 59186, 58000000, 83, "Les Gones", 1950, 7, 0, 5],
+      ["RC Lens", "RCL", "#facc15", "#dc2626", "stripes", "Bollaert-Delelis", 38223, 48000000, 81, "Sang et Or", 1906, 1, 0, 0],
+      ["Stade Rennais", "REN", "#dc2626", "#111827", "stripes", "Roazhon Park", 29778, 52000000, 81, "Les Rouge et Noir", 1901, 0, 0, 3],
+      ["Stade Brestois", "BRE", "#dc2626", "#ffffff", "solid", "Francis-Le Ble", 15220, 38000000, 79, "Les Pirates", 1950, 0, 0, 0],
+      ["Toulouse Violets", "TFC", "#7e22ce", "#ffffff", "solid", "Stadium de Toulouse", 33150, 34000000, 77, "Les Violets", 1970, 0, 0, 1],
+      ["Stade de Reims", "REI", "#dc2626", "#ffffff", "sleeves", "Auguste-Delaune", 21029, 34000000, 77, "Les Rouges", 1931, 6, 0, 2],
+      ["Montpellier Herault", "MHS", "#1e3a8a", "#f97316", "stripes", "Stade de la Mosson", 32900, 30000000, 76, "La Paillade", 1974, 1, 0, 2],
+      ["RC Strasbourg", "STR", "#2563eb", "#ffffff", "solid", "La Meinau", 26109, 38000000, 77, "Le Racing", 1906, 1, 0, 3],
+      ["FC Nantes", "NAN", "#facc15", "#16a34a", "stripes", "La Beaujoire", 35322, 30000000, 76, "Les Canaris", 1943, 8, 0, 4],
+      ["Le Havre AC", "HAC", "#38bdf8", "#1e3a8a", "halves", "Stade Oceane", 25178, 24000000, 74, "Club Doyen", 1894, 0, 0, 1],
+      ["AJ Auxerre", "AJA", "#f8fafc", "#2563eb", "solid", "Abbe-Deschamps", 18541, 24000000, 74, "AJA", 1905, 1, 0, 4],
+      ["Angers SCO", "ANG", "#111827", "#ffffff", "stripes", "Raymond-Kopa", 18752, 22000000, 73, "Les Scoistes", 1919, 0, 0, 0],
+      ["AS Saint-Etienne", "STE", "#16a34a", "#ffffff", "solid", "Geoffroy-Guichard", 41965, 28000000, 75, "Les Verts", 1919, 10, 0, 6]
+    ]
+  },
+  {
+    id: "alg_1", name: "Algerian Ligue 1 (16 Clubs)", country: "Algeria", flag: "🇩🇿", tier: 1, promo: 0, rel: 2,
+    clubs: [
+      ["MC Alger", "MCA", "#16a34a", "#dc2626", "stripes", "Stade Ali La Pointe", 40000, 18000000, 78, "Le Doyen", 1921, 8, 1, 8],
+      ["CR Belouizdad", "CRB", "#dc2626", "#ffffff", "sash", "Stade 5 Juillet", 64000, 17500000, 78, "Chabab", 1962, 10, 0, 9],
+      ["USM Alger", "USM", "#dc2626", "#111827", "stripes", "Stade Omar Hamadi", 17000, 16500000, 77, "El Ittihad", 1937, 8, 1, 8],
+      ["JS Kabylie", "JSK", "#facc15", "#16a34a", "solid", "Hocine Ait Ahmed", 50766, 15500000, 77, "Les Canaris", 1946, 14, 2, 5],
+      ["ES Setif", "ESS", "#111827", "#ffffff", "stripes", "Stade 8 Mai 1945", 25000, 14000000, 76, "L'Aigle Noir", 1958, 8, 2, 8],
+      ["CS Constantine", "CSC", "#16a34a", "#111827", "stripes", "Chahid Hamlaoui", 22986, 14000000, 75, "Les Sanafir", 1898, 2, 0, 0],
+      ["MC Oran", "MCO", "#dc2626", "#ffffff", "solid", "Miloud Hadefi (Oran)", 40143, 14500000, 75, "El Hamri", 1946, 4, 0, 4],
+      ["Paradou AC", "PAC", "#facc15", "#2563eb", "solid", "Stade Dar El Beida", 8000, 12000000, 74, "L'Academie", 1994, 0, 0, 0],
+      ["ASO Chlef", "ASO", "#dc2626", "#ffffff", "stripes", "Mohamed Boumezrag", 18000, 10500000, 73, "Ittihad Chlef", 1947, 1, 0, 2],
+      ["JS Saoura", "JSS", "#facc15", "#16a34a", "stripes", "Stade 20 Aout 1955", 20000, 11000000, 73, "Les Aigles du Sud", 2008, 0, 0, 0],
+      ["MC El Bayadh", "MCE", "#2563eb", "#ffffff", "solid", "Zakaria Medjdoub", 15000, 9000000, 71, "El Mouloudia", 1936, 0, 0, 0],
+      ["USM Khenchela", "USMK", "#111827", "#ffffff", "stripes", "Hamam Ammar", 8000, 9500000, 71, "Ciskaoua", 1943, 0, 0, 0],
+      ["NC Magra", "NCM", "#2563eb", "#ffffff", "solid", "Boucheligue Brothers", 8000, 8500000, 70, "Nedjm", 1998, 0, 0, 0],
+      ["US Biskra", "USB", "#16a34a", "#ffffff", "stripes", "Stade 18 Fevrier", 24000, 9000000, 70, "El Khadra", 1934, 0, 0, 0],
+      ["Olympique Akbou", "OA", "#2563eb", "#ffffff", "solid", "Stade Opow Bejaia", 18000, 9500000, 71, "Lions de la Soummam", 1936, 0, 0, 0],
+      ["ES Mostaganem", "ESM", "#16a34a", "#ffffff", "solid", "Mohamed Bensaïd", 18000, 9500000, 71, "Espérance", 1940, 0, 0, 0]
+    ]
+  },
+  {
+    id: "bra_1", name: "Brazil Brasileirão Série A (20 Clubs)", country: "Brazil", flag: "🇧🇷", tier: 1, promo: 0, rel: 4,
+    clubs: [
+      ["Flamengo Rio", "FLA", "#dc2626", "#111827", "hoops", "Maracana", 78838, 65000000, 85, "Mengao", 1895, 8, 3, 4],
+      ["Palmeiras Verdao", "PAL", "#16a34a", "#ffffff", "solid", "Allianz Parque", 43713, 62000000, 85, "Verdao", 1914, 12, 3, 4],
+      ["Boca Juniors (Invite)", "BOC", "#1e3a8a", "#facc15", "hoops", "La Bombonera", 54000, 48000000, 83, "Xeneizes", 1905, 35, 6, 4],
+      ["Botafogo Glorioso", "BOT", "#111827", "#ffffff", "stripes", "Nilton Santos", 44661, 52000000, 83, "Fogao", 1904, 2, 1, 0],
+      ["Sao Paulo Tricolor", "SAO", "#f8fafc", "#dc2626", "hoops", "Morumbi", 66795, 45000000, 82, "Tricolor", 1930, 6, 3, 1],
+      ["Atletico Mineiro", "CAM", "#111827", "#ffffff", "stripes", "Arena MRV", 46000, 46000000, 82, "Galo", 1908, 3, 1, 2],
+      ["Corinthians Timao", "COR", "#f8fafc", "#111827", "solid", "Neo Quimica Arena", 49205, 48000000, 81, "Timao", 1910, 7, 1, 3],
+      ["Fluminense Rio", "FLU", "#7f1d1d", "#16a34a", "stripes", "Maracana", 78838, 42000000, 81, "Fluzao", 1902, 4, 1, 1],
+      ["Gremio Porto", "GRE", "#38bdf8", "#111827", "stripes", "Arena do Gremio", 55662, 40000000, 80, "Imortal", 1903, 2, 3, 5],
+      ["Internacional Red", "INT", "#dc2626", "#ffffff", "solid", "Beira-Rio", 50128, 40000000, 80, "Colorado", 1909, 3, 2, 1],
+      ["Cruzeiro Celeste", "CRU", "#2563eb", "#ffffff", "solid", "Mineirao", 61927, 38000000, 79, "Raposa", 1921, 4, 2, 6],
+      ["Vasco da Gama", "VAS", "#111827", "#ffffff", "sash", "Sao Januario", 21880, 36000000, 79, "Gigante", 1898, 4, 1, 1],
+      ["Bahia Tricolor", "BAH", "#2563eb", "#dc2626", "stripes", "Fonte Nova", 47907, 38000000, 78, "Esquadrao", 1931, 2, 0, 0],
+      ["Fortaleza Leao", "FOR", "#2563eb", "#dc2626", "hoops", "Castelao", 63903, 32000000, 78, "Leao do Pici", 1918, 0, 0, 0],
+      ["Athletico Paranaense", "CAP", "#dc2626", "#111827", "stripes", "Ligga Arena", 42372, 34000000, 78, "Furacao", 1924, 1, 0, 1],
+      ["RB Bragantino", "RBB", "#f8fafc", "#dc2626", "solid", "Nabi Abi Chedid", 15010, 34000000, 77, "Massa Bruta", 1928, 0, 0, 0],
+      ["Juventude Verde", "JUV", "#16a34a", "#ffffff", "stripes", "Alfredo Jaconi", 19924, 22000000, 74, "Papo", 1913, 0, 0, 1],
+      ["Criciuma Tigre", "CRI", "#facc15", "#111827", "hoops", "Heriberto Hulse", 19225, 22000000, 74, "Tigre", 1947, 0, 0, 1],
+      ["EC Vitoria", "VIT", "#dc2626", "#111827", "hoops", "Barradao", 30793, 22000000, 74, "Leao da Barra", 1899, 0, 0, 0],
+      ["Cuiaba Dourado", "CUI", "#eab308", "#15803d", "solid", "Arena Pantanal", 44097, 22000000, 74, "Dourado", 2001, 0, 0, 0]
+    ]
+  }
+];
 
-let undoStack = [];
-let redoStack = [];
+/* FAMOUS REAL PLAYERS STARTER PACK (MATCHING SCREENSHOTS + WORLD STARS) */
+const FAMOUS_PLAYERS_SEED = [
+  // Manchester Red (Matching Screenshots)
+  { name: "B. Fernandes", clubShort: "MUN", pos: "AMR", age: 29, ovr: 88, pot: 89, nat: "🇵🇹 Portugal", wage: 150000, value: 68000000, contract: 2028, form: "7.45" },
+  { name: "C. Ronaldo", clubShort: "MUN", pos: "AML", age: 39, ovr: 89, pot: 89, nat: "🇵🇹 Portugal", wage: 200000, value: 45000000, contract: 2027, form: "8.10" },
+  { name: "R. Lukaku", clubShort: "MUN", pos: "ST", age: 31, ovr: 85, pot: 85, nat: "🇧🇪 Belgium", wage: 140000, value: 42000000, contract: 2027, form: "6.90" },
+  { name: "P. Pogba", clubShort: "MUN", pos: "MC", age: 31, ovr: 86, pot: 86, nat: "🇫🇷 France", wage: 130000, value: 48000000, contract: 2027, form: "7.12" },
+  { name: "Casemiro", clubShort: "MUN", pos: "MC", age: 32, ovr: 84, pot: 84, nat: "🇧🇷 Brazil", wage: 110000, value: 32000000, contract: 2028, form: "6.85" },
+  { name: "R. Varane", clubShort: "MUN", pos: "DC", age: 31, ovr: 85, pot: 85, nat: "🇫🇷 France", wage: 125000, value: 38000000, contract: 2027, form: "7.20" },
+  { name: "D. Dalot", clubShort: "MUN", pos: "DR", age: 25, ovr: 81, pot: 85, nat: "🇵🇹 Portugal", wage: 95000, value: 40000000, contract: 2028, form: "6.95" },
+  { name: "L. Shaw", clubShort: "MUN", pos: "DL", age: 28, ovr: 82, pot: 83, nat: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 England", wage: 100000, value: 35000000, contract: 2027, form: "7.05" },
+  { name: "A. Onana", clubShort: "MUN", pos: "GK", age: 28, ovr: 83, pot: 85, nat: "🇨🇲 Cameroon", wage: 105000, value: 38000000, contract: 2028, form: "7.15" },
+  { name: "K. Mainoo", clubShort: "MUN", pos: "MC", age: 19, ovr: 81, pot: 91, nat: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 England", wage: 65000, value: 55000000, contract: 2029, form: "7.30" },
+  { name: "A. Garnacho", clubShort: "MUN", pos: "AML", age: 20, ovr: 82, pot: 90, nat: "🇦🇷 Argentina", wage: 75000, value: 60000000, contract: 2029, form: "7.28" },
+  // Transfer Market Stars from Screenshot
+  { name: "Saka", clubShort: "ARS", pos: "AMR", age: 22, ovr: 87, pot: 92, nat: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 England", wage: 200000, value: 85000000, contract: 2029, form: "7.85", status: "Listed" },
+  { name: "Haaland", clubShort: "MCI", pos: "ST", age: 23, ovr: 91, pot: 95, nat: "🇳🇴 Norway", wage: 350000, value: 150000000, contract: 2029, form: "8.35", status: "Unhappy" },
+  { name: "Leao", clubShort: "MIL", pos: "AML", age: 24, ovr: 86, pot: 90, nat: "🇵🇹 Portugal", wage: 180000, value: 75500000, contract: 2028, form: "7.60", status: "Listed" },
+  { name: "Bellingham", clubShort: "RMA", pos: "MC", age: 20, ovr: 88, pot: 94, nat: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 England", wage: 220000, value: 110000000, contract: 2030, form: "8.15", status: "Observed" },
+  { name: "Pedri", clubShort: "BAR", pos: "MC", age: 21, ovr: 85, pot: 92, nat: "🇪🇸 Spain", wage: 140000, value: 68000000, contract: 2029, form: "7.55", status: "Listed" },
+  { name: "Gvardiol", clubShort: "MCI", pos: "DC", age: 22, ovr: 84, pot: 90, nat: "🇭🇷 Croatia", wage: 125000, value: 62000000, contract: 2029, form: "7.40", status: "-" },
+  { name: "James", clubShort: "CHE", pos: "DR", age: 24, ovr: 83, pot: 87, nat: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 England", wage: 150000, value: 55000000, contract: 2028, form: "7.22", status: "Listed" },
+  { name: "Davies", clubShort: "BAY", pos: "DL", age: 23, ovr: 84, pot: 89, nat: "🇨🇦 Canada", wage: 130000, value: 58000000, contract: 2027, form: "7.48", status: "Listed" },
+  { name: "Maignan", clubShort: "MIL", pos: "GK", age: 28, ovr: 85, pot: 87, nat: "🇫🇷 France", wage: 110000, value: 45000000, contract: 2028, form: "7.50", status: "-" },
+  { name: "K. Mbappe", clubShort: "RMA", pos: "ST", age: 25, ovr: 92, pot: 95, nat: "🇫🇷 France", wage: 340000, value: 160000000, contract: 2029, form: "8.40", status: "Observed" },
+  { name: "L. Yamal", clubShort: "BAR", pos: "AMR", age: 17, ovr: 86, pot: 96, nat: "🇪🇸 Spain", wage: 120000, value: 120000000, contract: 2030, form: "8.05", status: "Observed" },
+  { name: "M. Salah", clubShort: "LIV", pos: "AMR", age: 31, ovr: 89, pot: 89, nat: "🇪🇬 Egypt", wage: 260000, value: 65000000, contract: 2027, form: "7.95", status: "Listed" },
+  { name: "R. Mahrez", clubShort: "MCA", pos: "AMR", age: 33, ovr: 85, pot: 85, nat: "🇩🇿 Algeria", wage: 95000, value: 28000000, contract: 2027, form: "7.90", status: "Listed" },
+  { name: "I. Bennacer", clubShort: "MIL", pos: "MC", age: 26, ovr: 83, pot: 86, nat: "🇩🇿 Algeria", wage: 105000, value: 42000000, contract: 2028, form: "7.45", status: "Listed" },
+  { name: "A. Gouiri", clubShort: "REN", pos: "ST", age: 24, ovr: 81, pot: 85, nat: "🇩🇿 Algeria", wage: 78000, value: 34000000, contract: 2028, form: "7.35", status: "Listed" }
+];
+
+const FIRST_NAMES = ["Lucas", "Mateo", "Leo", "Hugo", "Karim", "Riyad", "Amine", "Yacine", "Jude", "Cole", "Declan", "Marco", "Alessandro", "Florian", "Jamal", "Ousmane", "Warren", "Gabriel", "Endrick", "Julian"];
+const LAST_NAMES = ["Silva", "Santos", "Fernandez", "Gomez", "Bennacer", "Brahimi", "Zorgane", "Amoura", "Palmer", "Watkins", "Barella", "Bastoni", "Wirtz", "Musiala", "Camavinga", "Saliba", "Martinelli", "Alvarez", "Romero", "Martinez"];
+
 let state = null;
-let currentSection = "menu";
-let currentSubTab = "home";
-let selectedPlayerId = null;
-let selectedTeamId = null;
-let selectedBenchSwapId = null;
-let liveMatchTimer = null;
-let liveMatchState = null;
+let navStack = [];
+let currentTab = "dashboard"; // dashboard, inbox, squad, schedule, club, menu, editor
+let currentSub = "overview";
+let viewedCompetitionId = "eng_1"; // Lets user inspect ANY league or cup in the world!
+let activeNegotiationPlayerId = null;
+let activeContractPlayerId = null;
+let selectedSwapPlayerId = null;
+let marketFilterPos = "ALL";
+let searchQuery = "";
+let liveMatchObj = null;
+let liveMatchInterval = null;
 
-function uid(prefix = "id") {
-  return prefix + "_" + Math.random().toString(36).substring(2, 9);
+function uid(p = "id") {
+  return p + "_" + Math.random().toString(36).substring(2, 9);
 }
-
 function rInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
 function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/* STRICTLY 2D FLAT VECTOR CREST GENERATOR - NO SHADOWS, NO 3D */
-function render2DCrestSVG(team, size = 34) {
-  if (team && team.customLogoData) {
-    return `<img src="${team.customLogoData}" style="width:${size}px;height:${size}px;object-fit:contain;box-shadow:none;filter:none;" />`;
+/* ============================================================================
+   STRICTLY 2D FLAT VECTOR CRESTS & 2D FLAT KITS (NO SHADOWS, NO 3D)
+   ============================================================================ */
+function render2DCrest(club, size = 34) {
+  if (!club) return "";
+  if (club.customLogo) {
+    return `<img class="flat-2d" src="${club.customLogo}" style="width:${size}px;height:${size}px;object-fit:contain;" />`;
   }
-  const c1 = (team && team.primaryColor) || "#10b981";
-  const c2 = (team && team.secondaryColor) || "#1e293b";
-  const short = (team && team.shortName) ? team.shortName.substring(0, 3).toUpperCase() : "FC";
-  const pattern = (team && team.kitPattern) || "stripes";
-  let inner = "";
-  if (pattern === "stripes") {
-    inner = `<rect x="28" y="12" width="14" height="76" fill="${c2}"/><rect x="58" y="12" width="14" height="76" fill="${c2}"/>`;
-  } else if (pattern === "sash") {
-    inner = `<polygon points="20,15 35,15 80,85 65,85" fill="${c2}"/>`;
-  } else {
-    inner = `<rect x="12" y="42" width="76" height="18" fill="${c2}"/>`;
-  }
-  return `<svg class="crest-2d" width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="12,10 88,10 88,60 50,92 12,60" fill="${c1}" stroke="#f8fafc" stroke-width="4"/>
-    ${inner}
-    <circle cx="50" cy="48" r="18" fill="#080c14" stroke="#f8fafc" stroke-width="3"/>
-    <text x="50" y="53" text-anchor="middle" fill="#f8fafc" font-size="13" font-weight="800" font-family="sans-serif">${short}</text>
+  const c1 = club.c1 || "#ef4444";
+  const c2 = club.c2 || "#ffffff";
+  const short = (club.short || "FC").substring(0, 3);
+  return `<svg class="flat-2d" width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12,10 L88,10 L88,56 C88,76 50,92 50,92 C50,92 12,76 12,56 Z" fill="${c1}" stroke="#e2e8f0" stroke-width="5"/>
+    <path d="M26,16 L74,16 L74,54 C74,68 50,80 50,80 C50,80 26,68 26,54 Z" fill="none" stroke="${c2}" stroke-width="3"/>
+    <circle cx="50" cy="48" r="18" fill="${c2}"/>
+    <text x="50" y="53" text-anchor="middle" fill="${c1 === '#f8fafc' || c1 === '#facc15' ? '#0f172a' : c1}" font-size="13" font-weight="900" font-family="sans-serif">${short}</text>
   </svg>`;
 }
 
-function calcPlayerOverall(attr, pos) {
-  if (!attr) return 65;
-  if (pos === "GK") {
-    return Math.round((attr.gk * 3 + attr.def * 1.5 + attr.pas + attr.phy * 1.5) / 7);
-  }
-  if (pos === "DEF") {
-    return Math.round((attr.def * 3 + attr.phy * 2 + attr.pac + attr.pas) / 7);
-  }
-  if (pos === "MID") {
-    return Math.round((attr.pas * 2.5 + attr.dri * 2 + attr.sho + attr.def + attr.pac * 0.5) / 7);
-  }
-  return Math.round((attr.sho * 3 + attr.pac * 2 + attr.dri * 1.5 + attr.phy * 0.5) / 7);
+function render2DKit(c1, c2, number = "", size = 36) {
+  return `<svg class="flat-2d" width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <path d="M30,14 L10,32 L22,46 L30,38 L30,88 L70,88 L70,38 L78,46 L90,32 L70,14 L60,14 C56,22 44,22 40,14 Z" fill="${c1}" stroke="${c2}" stroke-width="4"/>
+    ${number ? `<text x="50" y="60" text-anchor="middle" fill="${c2}" font-size="24" font-weight="900" font-family="sans-serif">${number}</text>` : `<circle cx="60" cy="36" r="5" fill="${c2}"/>`}
+  </svg>`;
 }
 
-function calcMarketValue(ovr, age, pot) {
-  const base = Math.pow(Math.max(1, ovr - 45), 2.35) * 950;
-  const ageFactor = age <= 23 ? 1.35 : age <= 28 ? 1.1 : age <= 32 ? 0.75 : 0.4;
-  const potBonus = Math.max(0, pot - ovr) * 180000;
-  return Math.round((base * ageFactor + potBonus) / 10000) * 10000;
-}
-
-function generatePlayer(teamId, pos, country, tierBoost = 0) {
-  const natPool = FAKE_NAMES[country] || FAKE_NAMES.England;
-  const first = pick(natPool.first);
-  const last = pick(natPool.last);
-  const age = rInt(17, 34);
-  const base = rInt(56, 78) + tierBoost;
-  const attr = {
-    pac: Math.min(99, Math.max(35, base + (pos === "FWD" ? rInt(2, 12) : rInt(-6, 8)))),
-    sho: Math.min(99, Math.max(30, base + (pos === "FWD" ? rInt(4, 14) : pos === "GK" ? -25 : rInt(-8, 8)))),
-    pas: Math.min(99, Math.max(35, base + (pos === "MID" ? rInt(4, 13) : rInt(-5, 8)))),
-    dri: Math.min(99, Math.max(35, base + (pos === "MID" || pos === "FWD" ? rInt(3, 12) : rInt(-8, 6)))),
-    def: Math.min(99, Math.max(30, base + (pos === "DEF" ? rInt(5, 14) : pos === "GK" ? -15 : rInt(-12, 5)))),
-    phy: Math.min(99, Math.max(40, base + rInt(-4, 10))),
-    gk: Math.min(99, Math.max(20, pos === "GK" ? base + rInt(6, 15) : rInt(15, 35)))
-  };
-  const ovr = calcPlayerOverall(attr, pos);
-  const pot = Math.min(99, Math.max(ovr, ovr + (age < 24 ? rInt(4, 15) : rInt(0, 3))));
-  const value = calcMarketValue(ovr, age, pot);
+/* ============================================================================
+   BUILD FULL WORLD DATABASE (156 REAL-SIZE CLUBS ACROSS 8 LEAGUES + CUPS)
+   ============================================================================ */
+function generatePlayerForClub(clubId, pos, rep, natFlag) {
+  const fn = pick(FIRST_NAMES);
+  const ln = pick(LAST_NAMES);
+  const age = rInt(18, 34);
+  const ovr = Math.min(93, Math.max(58, rep + rInt(-7, 5)));
+  const pot = Math.min(96, Math.max(ovr, ovr + (age < 24 ? rInt(3, 11) : rInt(0, 2))));
+  const value = Math.round(Math.pow(Math.max(1, ovr - 48), 2.38) * 1150 / 100000) * 100000;
   return {
-    id: uid("ply"),
-    name: `${first} ${last}`,
-    teamId,
-    nationality: country,
-    age,
+    id: uid("p"),
+    name: `${fn[0]}. ${ln}`,
+    clubId,
     pos,
-    foot: Math.random() > 0.25 ? "Right" : "Left",
-    attr,
+    age,
     ovr,
     pot,
-    morale: rInt(72, 95),
-    fitness: 100,
-    injuredWeeks: 0,
-    injuryHistory: [],
-    wage: Math.max(1500, Math.round(value / 220)),
-    contractYears: rInt(1, 5),
+    nat: natFlag || "🏴󠁧󠁢󠁥󠁮󠁧󠁿 England",
+    wage: Math.max(5000, Math.round(value / 380)),
     value,
-    traits: [pick(["Leader", "Playmaker", "Speedster", "Clinical", "Engine", "Acrobatic"])],
-    transferListed: false,
-    loanListed: false,
-    photoData: null,
-    stats: { apps: 0, goals: 0, assists: 0, cleanSheets: 0, avgRating: 6.8 }
+    contract: rInt(2026, 2030),
+    form: (6.5 + Math.random() * 1.6).toFixed(2),
+    fit: rInt(82, 100),
+    morale: rInt(75, 98),
+    status: Math.random() < 0.25 ? "Listed" : "-",
+    goals: 0,
+    assists: 0
   };
 }
 
-function generateRoundRobinFixtures(teamIds, leagueId) {
-  const teams = [...teamIds];
-  if (teams.length % 2 !== 0) teams.push("BYE");
-  const n = teams.length;
-  const rounds = n - 1;
+function generateLeagueFixtures(clubIds, compId) {
+  const list = [...clubIds];
+  if (list.length % 2 !== 0) list.push("BYE");
+  const n = list.length;
+  const totalRounds = (n - 1) * 2;
   const fixtures = [];
-  for (let r = 0; r < rounds * 2; r++) {
-    const isSecondHalf = r >= rounds;
+  const dates = ["12 OCT", "19 OCT", "26 OCT", "02 NOV", "09 NOV", "16 NOV", "23 NOV", "30 NOV", "07 DEC", "14 DEC"];
+  for (let r = 0; r < totalRounds; r++) {
+    const secondHalf = r >= (n - 1);
     for (let i = 0; i < n / 2; i++) {
-      const t1 = teams[i];
-      const t2 = teams[n - 1 - i];
-      if (t1 !== "BYE" && t2 !== "BYE") {
+      const h = secondHalf ? list[n - 1 - i] : list[i];
+      const a = secondHalf ? list[i] : list[n - 1 - i];
+      if (h !== "BYE" && a !== "BYE") {
         fixtures.push({
-          id: uid("fix"),
-          leagueId,
+          id: uid("fx"),
+          compId,
           week: r + 1,
-          homeId: isSecondHalf ? t2 : t1,
-          awayId: isSecondHalf ? t1 : t2,
+          dateStr: dates[r % dates.length],
+          homeId: h,
+          awayId: a,
           played: false,
-          homeGoals: 0,
-          awayGoals: 0,
-          events: []
+          hg: 0,
+          ag: 0
         });
       }
     }
-    teams.splice(1, 0, teams.pop());
+    list.splice(1, 0, list.pop());
   }
   return fixtures;
 }
 
-function buildStarterDatabase() {
-  const leagues = [
-    { id: "lg_1", name: "Premier Division", country: "England", tier: 1, promoSpots: 0, relSpots: 2, prizeMoney: 35000000 },
-    { id: "lg_2", name: "Championship Division", country: "England", tier: 2, promoSpots: 2, relSpots: 0, prizeMoney: 14000000 }
-  ];
-
-  const clubTemplates = [
-    // League 1 (12 Teams)
-    ["North London Red", "NLR", "#ef4444", "#ffffff", "stripes", "Emirates Arena", 60000, 55000000, 88],
-    ["Manchester Sky", "MCI", "#38bdf8", "#0f172a", "sash", "Etihad Dome", 54000, 72000000, 92],
-    ["Merseyside Athletic", "LIV", "#dc2626", "#facc15", "hoops", "Anfield Park", 61000, 52000000, 90],
-    ["West London Blues", "CHE", "#2563eb", "#ffffff", "stripes", "Stamford Ground", 42000, 58000000, 86],
-    ["Manchester Devils", "MUN", "#b91c1c", "#111827", "sash", "Trafford Stadium", 74000, 62000000, 87],
-    ["Tyneside United", "NEW", "#1e293b", "#f8fafc", "stripes", "St James Arena", 52000, 48000000, 84],
-    ["Midlands Villa", "AVL", "#7c2d12", "#38bdf8", "hoops", "Villa Fortress", 43000, 40000000, 83],
-    ["North London Lily", "TOT", "#f8fafc", "#1e3a8a", "sash", "Hotspur Bowl", 62000, 46000000, 84],
-    ["East London Irons", "WHU", "#7f1d1d", "#0284c7", "stripes", "Olympic Field", 60000, 32000000, 79],
-    ["Sussex Seagulls", "BHA", "#0284c7", "#f8fafc", "stripes", "Amex Coast", 32000, 30000000, 78],
-    ["Mersey Toffees", "EVE", "#1d4ed8", "#ffffff", "hoops", "Bramley Dock", 52000, 24000000, 76],
-    ["Midlands Wolves", "WOL", "#f59e0b", "#111827", "sash", "Molineux Ground", 31000, 22000000, 75],
-    // League 2 (12 Teams)
-    ["Yorkshire Whites", "LEE", "#f8fafc", "#eab308", "sash", "Elland Road", 37000, 18000000, 74],
-    ["South Coast Saints", "SOU", "#ef4444", "#111827", "stripes", "St Marys", 32000, 16000000, 73],
-    ["East Midlands Foxes", "LEI", "#1d4ed8", "#facc15", "hoops", "King Power", 32000, 17000000, 74],
-    ["Burnley Clarets", "BUR", "#7f1d1d", "#38bdf8", "sash", "Turf Moor", 22000, 14000000, 72],
-    ["Steel City Blades", "SHU", "#dc2626", "#f8fafc", "stripes", "Bramall Lane", 32000, 13000000, 71],
-    ["Wearside Black Cats", "SUN", "#ef4444", "#090d16", "stripes", "Stadium of Light", 48000, 13500000, 72],
-    ["Norfolk Canaries", "NOR", "#eab308", "#16a34a", "hoops", "Carrow Park", 27000, 12000000, 70],
-    ["Teesside Boro", "MID", "#dc2626", "#ffffff", "hoops", "Riverside", 34000, 11500000, 70],
-    ["West Bromwich", "WBA", "#1e3a8a", "#ffffff", "stripes", "The Hawthorns", 26000, 11000000, 69],
-    ["Coventry Sky", "COV", "#38bdf8", "#1e293b", "sash", " Coventry Arena", 32000, 10000000, 68],
-    ["Ipswich Tractor", "IPS", "#2563eb", "#ffffff", "stripes", "Portman Road", 30000, 11000000, 69],
-    ["Watford Hornets", "WAT", "#facc15", "#dc2626", "hoops", "Vicarage Road", 22000, 10500000, 68]
-  ];
-
-  const teams = [];
+function createInitialWorldState() {
+  const leagues = [];
+  const clubs = [];
   const players = [];
-  const positions = [
-    "GK", "GK",
-    "DEF", "DEF", "DEF", "DEF", "DEF", "DEF",
-    "MID", "MID", "MID", "MID", "MID", "MID",
-    "FWD", "FWD", "FWD", "FWD"
-  ];
+  let fixtures = [];
 
-  clubTemplates.forEach((tpl, idx) => {
-    const isLg1 = idx < 12;
-    const lgId = isLg1 ? "lg_1" : "lg_2";
-    const tId = `team_${idx + 1}`;
-    const squadIds = [];
-    positions.forEach((pos) => {
-      const p = generatePlayer(tId, pos, pick(["England", "Spain", "Algeria", "Brazil", "France"]), isLg1 ? 6 : -2);
-      players.push(p);
-      squadIds.push(p.id);
+  const rosterPositions = ["GK", "GK", "DR", "DL", "DC", "DC", "DC", "MC", "MC", "MC", "MC", "AMR", "AMR", "AML", "AML", "ST", "ST", "ST"];
+
+  WORLD_LEAGUE_DATA.forEach(lg => {
+    leagues.push({
+      id: lg.id,
+      name: lg.name,
+      country: lg.country,
+      flag: lg.flag,
+      tier: lg.tier,
+      promo: lg.promo,
+      rel: lg.rel,
+      type: "league"
     });
-    teams.push({
-      id: tId,
-      name: tpl[0],
-      shortName: tpl[1],
-      leagueId: lgId,
-      country: "England",
-      primaryColor: tpl[2],
-      secondaryColor: tpl[3],
-      kitPattern: tpl[4],
-      stadiumName: tpl[5],
-      stadiumCapacity: tpl[6],
-      budget: tpl[7],
-      wageBudget: Math.round(tpl[7] * 0.03),
-      reputation: tpl[8],
-      rivals: idx % 2 === 0 ? `team_${idx + 2}` : `team_${idx}`,
-      customLogoData: null,
-      facilitiesLevel: isLg1 ? 4 : 2,
-      youthLevel: isLg1 ? 4 : 2,
-      lineup: squadIds.slice(0, 11),
-      bench: squadIds.slice(11, 18),
-      tactics: {
+
+    const lgClubIds = [];
+    lg.clubs.forEach((c) => {
+      const clubId = `club_${c[1]}_${lg.id}`;
+      lgClubIds.push(clubId);
+
+      // Seed famous real players for this club first
+      const seeded = FAMOUS_PLAYERS_SEED.filter(fp => fp.clubShort === c[1] && lg.id !== "eng_2");
+      const clubPlayerIds = [];
+
+      seeded.forEach(fp => {
+        const pid = uid("p");
+        players.push({
+          id: pid,
+          name: fp.name,
+          clubId,
+          pos: fp.pos,
+          age: fp.age,
+          ovr: fp.ovr,
+          pot: fp.pot,
+          nat: fp.nat,
+          wage: fp.wage,
+          value: fp.value,
+          contract: fp.contract,
+          form: fp.form,
+          fit: rInt(86, 100),
+          morale: rInt(80, 96),
+          status: fp.status || "Listed",
+          goals: rInt(1, 9),
+          assists: rInt(0, 6)
+        });
+        clubPlayerIds.push(pid);
+      });
+
+      // Fill remaining squad up to 22 players
+      rosterPositions.forEach(pos => {
+        if (clubPlayerIds.length < 22) {
+          const p = generatePlayerForClub(clubId, pos, c[8], `${lg.flag} ${lg.country}`);
+          players.push(p);
+          clubPlayerIds.push(p.id);
+        }
+      });
+
+      clubs.push({
+        id: clubId,
+        name: c[0],
+        short: c[1],
+        leagueId: lg.id,
+        country: lg.country,
+        c1: c[2],
+        c2: c[3],
+        pattern: c[4],
+        stadium: c[5],
+        capacity: c[6],
+        budget: c[7],
+        rep: c[8],
+        nickname: c[9],
+        founded: c[10],
+        trophiesLeague: c[11],
+        trophiesCont: c[12],
+        trophiesCup: c[13],
+        youthStars: c[8] >= 88 ? 4 : 3,
+        trainingStars: c[8] >= 88 ? 4 : 3,
         formation: "4-3-3",
         mentality: "Attacking",
-        pressing: "High",
-        width: "Wide",
-        tempo: "Fast",
-        playmakerRole: "Advanced Playmaker",
-        captainId: squadIds[2],
-        fkTakerId: squadIds[8],
-        penTakerId: squadIds[14],
-        savedPresets: []
-      },
-      training: { focus: "Balanced", intensity: "Medium" },
-      financesHistory: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map(() => rInt(-500000, 1800000)),
-      sponsorIncome: isLg1 ? 18000000 : 6000000,
-      stats: { p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, form: [] }
+        lineup: clubPlayerIds.slice(0, 11),
+        bench: clubPlayerIds.slice(11),
+        stats: { p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, form: [] }
+      });
     });
+
+    fixtures.push(...generateLeagueFixtures(lgClubIds, lg.id));
   });
 
-  // Generate 25 Free Agents
-  for (let i = 0; i < 25; i++) {
-    players.push(generatePlayer("FREE", pick(["GK", "DEF", "MID", "FWD"]), pick(["England", "Spain", "Algeria", "Brazil", "France"]), 0));
-  }
-
-  const staff = [
-    { id: "st_1", name: "Marco Conti", role: "Assistant Manager", rating: 82, wage: 14000, teamId: "team_1" },
-    { id: "st_2", name: "Karim Belkacem", role: "Chief Scout", rating: 85, wage: 12000, teamId: "team_1" },
-    { id: "st_3", name: "Dr. Elena Vance", role: "Head Physio", rating: 84, wage: 11000, teamId: "team_1" },
-    { id: "st_4", name: "Lucas Silva", role: "Youth Director", rating: 80, wage: 10000, teamId: "FREE" },
-    { id: "st_5", name: "David Sterling", role: "Tactical Coach", rating: 86, wage: 15000, teamId: "FREE" },
-    { id: "st_6", name: "Tariq Mansouri", role: "Chief Scout", rating: 88, wage: 16000, teamId: "FREE" }
+  // Add Continental & Domestic Cup Competitions so user can view all competitions
+  const cups = [
+    { id: "ucl_cup", name: "UEFA Champions Cup", country: "Europe", flag: "🇪🇺", type: "cup" },
+    { id: "caf_cup", name: "CAF African Champions Cup", country: "Africa", flag: "🌍", type: "cup" },
+    { id: "lib_cup", name: "Copa Libertadores", country: "South America", flag: "🌎", type: "cup" },
+    { id: "fa_cup", name: "English Domestic Cup", country: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", type: "cup" }
   ];
 
-  const lg1Teams = teams.filter(t => t.leagueId === "lg_1").map(t => t.id);
-  const lg2Teams = teams.filter(t => t.leagueId === "lg_2").map(t => t.id);
-  const fixtures = [
-    ...generateRoundRobinFixtures(lg1Teams, "lg_1"),
-    ...generateRoundRobinFixtures(lg2Teams, "lg_2")
-  ];
+  const defaultUserClub = clubs.find(c => c.short === "MUN") || clubs[0];
 
-  // Knockout Cup Bracket (Round of 16 using top 16 teams)
-  const cupMatches = [];
-  for (let i = 0; i < 16; i += 2) {
-    cupMatches.push({
-      id: uid("cup"),
-      round: "Round of 16",
-      homeId: teams[i].id,
-      awayId: teams[i + 1].id,
-      played: false,
-      homeGoals: 0,
-      awayGoals: 0,
-      winnerId: null
-    });
-  }
-
-  return {
-    meta: {
-      dbName: "Default 2026 World Database",
-      version: "1.0",
-      currency: "€",
-      maxSquadSize: 25,
-      transferWindowOpen: true,
-      ageMin: 15,
-      ageMax: 42
-    },
-    manager: {
-      name: "Alex Ferguson Jr.",
-      nationality: "Algeria",
-      clubId: "team_1",
-      difficulty: "Normal",
-      boardConfidence: 85,
-      trophies: [],
-      seasonHistory: []
-    },
-    season: 2026,
+  const initialState = {
+    meta: { currency: "£", dbName: "FM26 Official World Database (8 Leagues, 156 Clubs)" },
+    userClubId: defaultUserClub.id,
     week: 1,
+    season: 2026,
+    boardConfidence: 84,
     leagues,
-    teams,
+    cups,
+    clubs,
     players,
-    staff,
     fixtures,
-    cupMatches,
-    shortlist: [],
-    youthCandidates: [
-      generatePlayer("YOUTH", "MID", "Algeria", -6),
-      generatePlayer("YOUTH", "FWD", "England", -5),
-      generatePlayer("YOUTH", "DEF", "France", -7)
-    ],
     inbox: [
-      { id: uid("msg"), week: 1, category: "Board", title: "Welcome to the Club!", body: "The Board expects a strong campaign. Review your squad, set your tactics, and prepare for Matchday 1.", read: false },
-      { id: uid("msg"), week: 1, category: "Scouting", title: "Transfer Window Open", body: "Our scouts have identified top targets in the Transfer Market and Free Agency.", read: false }
-    ],
-    mediaLibrary: {},
-    backups: []
+      { id: uid("m"), week: 1, type: "Scout", title: "Inbox: Scout report on transfer targets available", body: "Chief Scout has compiled a list of top world targets including Saka, Haaland, Bellingham, Leao, and Mahrez.", unread: true },
+      { id: uid("m"), week: 1, type: "News", title: "News: Chairman demands title challenge this season", body: "The Board expects high standards across Domestic League and Champions Cup fixtures.", unread: false }
+    ]
   };
+
+  // Pre-simulate 10 matchdays so League Tables, Form Badges & Stats look rich immediately like the screenshots!
+  for (let w = 1; w <= 10; w++) {
+    simulateWeekFixtures(initialState, w);
+  }
+  initialState.week = 11;
+  return initialState;
 }
 
-function saveState() {
+function simulateWeekFixtures(st, wk) {
+  st.fixtures.filter(f => f.week === wk && !f.played).forEach(f => {
+    const h = st.clubs.find(c => c.id === f.homeId);
+    const a = st.clubs.find(c => c.id === f.awayId);
+    if (!h || !a) return;
+    f.played = true;
+    const diff = (h.rep + 3 - a.rep) / 14;
+    f.hg = Math.max(0, Math.round(rInt(0, 3) + (diff > 0 ? diff : 0)));
+    f.ag = Math.max(0, Math.round(rInt(0, 2) + (diff < 0 ? -diff : 0)));
+    recordResultInStandings(h, a, f.hg, f.ag);
+  });
+}
+
+function recordResultInStandings(h, a, hg, ag) {
+  h.stats.p++; a.stats.p++;
+  h.stats.gf += hg; h.stats.ga += ag;
+  a.stats.gf += ag; a.stats.ga += hg;
+  if (hg > ag) {
+    h.stats.w++; h.stats.pts += 3; h.stats.form.push("W");
+    a.stats.l++; a.stats.form.push("L");
+  } else if (hg < ag) {
+    a.stats.w++; a.stats.pts += 3; a.stats.form.push("W");
+    h.stats.l++; h.stats.form.push("L");
+  } else {
+    h.stats.d++; a.stats.d++; h.stats.pts += 1; a.stats.pts += 1;
+    h.stats.form.push("D"); a.stats.form.push("D");
+  }
+}
+
+function saveGame() {
   if (!state) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) {
-    console.warn("Storage full or restricted", e);
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+
+function getUserClub() {
+  return state.clubs.find(c => c.id === state.userClubId) || state.clubs[0];
+}
+function getClub(id) {
+  return state.clubs.find(c => c.id === id) || { name: "Free Agent", short: "FA", c1: "#475569", c2: "#ffffff" };
+}
+function getClubPlayers(clubId) {
+  return state.players.filter(p => p.clubId === clubId);
+}
+function fmtMoney(val) {
+  const sym = (state && state.meta && state.meta.currency) || "£";
+  if (Math.abs(val) >= 1000000) return `${sym}${(val / 1000000).toFixed(1)}M`;
+  if (Math.abs(val) >= 1000) return `${sym}${Math.round(val / 1000)}K`;
+  return `${sym}${val}`;
+}
+
+/* ============================================================================
+   NAVIGATION & ROUTER
+   ============================================================================ */
+function navigate(tab, sub) {
+  navStack.push({ tab: currentTab, sub: currentSub });
+  currentTab = tab;
+  currentSub = sub || getDefaultSub(tab);
+  render();
+}
+
+function goBackScreen() {
+  if (navStack.length > 0) {
+    const prev = navStack.pop();
+    currentTab = prev.tab;
+    currentSub = prev.sub;
+    render();
+  } else {
+    currentTab = "menu";
+    currentSub = "main_menu";
+    render();
   }
 }
 
-function pushUndoSnapshot() {
-  if (!state) return;
-  undoStack.push(JSON.stringify(state));
-  if (undoStack.length > 8) undoStack.shift();
-  redoStack = [];
+function getDefaultSub(tab) {
+  const map = {
+    menu: "main_menu",
+    dashboard: "overview",
+    inbox: "inbox",
+    squad: "management",
+    schedule: "fixtures",
+    club: "club_overview",
+    editor: "ed_home"
+  };
+  return map[tab] || "overview";
 }
 
-function getUserTeam() {
-  return state.teams.find(t => t.id === state.manager.clubId) || state.teams[0];
-}
-
-function getTeamById(id) {
-  return state.teams.find(t => t.id === id) || { name: "Free Agent", shortName: "FA", primaryColor: "#64748b", secondaryColor: "#1e293b" };
-}
-
-function getTeamPlayers(teamId) {
-  return state.players.filter(p => p.teamId === teamId);
-}
-
-function formatMoney(n) {
-  const cur = (state && state.meta && state.meta.currency) || "€";
-  if (Math.abs(n) >= 1000000) return cur + (n / 1000000).toFixed(2) + "M";
-  if (Math.abs(n) >= 1000) return cur + Math.round(n / 1000) + "K";
-  return cur + n;
-}
-
-/* NAVIGATION & RENDERING */
-const NAV_CONFIG = {
-  menu: { label: "Menu", icon: "🏠", tabs: ["home", "new_game", "load_save", "settings"] },
-  dashboard: { label: "Home", icon: "📊", tabs: ["overview", "inbox", "staff", "youth", "facilities", "board", "season_summary"] },
-  squad: { label: "Squad", icon: "👕", tabs: ["list", "lineup", "tactics", "training", "profile"] },
-  matches: { label: "Match", icon: "⚽", tabs: ["fixtures", "pre_match", "live_match", "post_match"] },
-  competitions: { label: "League", icon: "🏆", tabs: ["table", "cups", "stats_awards"] },
-  transfers: { label: "Market", icon: "💼", tabs: ["market", "scouting", "negotiations", "contracts", "finances"] },
-  editor: { label: "Editor", icon: "🛠️", tabs: ["ed_home", "ed_teams", "ed_players", "ed_leagues", "ed_media", "ed_import_export", "ed_extras"] }
-};
-
-function setSection(sec, tab) {
-  currentSection = sec;
-  currentSubTab = tab || NAV_CONFIG[sec].tabs[0];
-  renderApp();
-}
-
-function renderApp() {
+function render() {
   if (!state) {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    state = saved ? JSON.parse(saved) : buildStarterDatabase();
+    const raw = localStorage.getItem(SAVE_KEY);
+    state = raw ? JSON.parse(raw) : createInitialWorldState();
   }
-  const userTeam = getUserTeam();
-  document.getElementById("hdr-club").innerHTML = `${render2DCrestSVG(userTeam, 22)} ${userTeam.name}`;
-  document.getElementById("hdr-date").textContent = `Season ${state.season} • Week ${state.week} • ${formatMoney(userTeam.budget)} • Conf: ${state.manager.boardConfidence}%`;
 
-  const hdrBtns = document.getElementById("hdr-btns");
-  hdrBtns.innerHTML = `
-    <button class="btn btn-sec" onclick="setSection('menu','home')">Menu</button>
-    <button class="btn" onclick="advanceWeek()">Advance ▶</button>
-  `;
+  const headerEl = document.getElementById("app-header");
+  const topTabsEl = document.getElementById("top-tabs");
+  const bottomNavEl = document.getElementById("bottom-nav");
+  const viewEl = document.getElementById("app-view");
 
-  // Sub-tabs
-  const subTabsEl = document.getElementById("sub-tabs");
-  const tabs = NAV_CONFIG[currentSection].tabs;
-  subTabsEl.innerHTML = tabs.map(t => {
-    const nice = t.replace(/^ed_/, "").replace(/_/g, " ").toUpperCase();
-    return `<div class="tab-chip ${t === currentSubTab ? 'active' : ''}" onclick="setSection('${currentSection}','${t}')">${nice}</div>`;
-  }).join("");
+  // Hide header/bottom-nav on full-screen Main Menu to match Screenshot 1
+  if (currentTab === "menu" && currentSub === "main_menu") {
+    headerEl.style.display = "none";
+    topTabsEl.style.display = "none";
+    bottomNavEl.style.display = "none";
+    viewEl.style.paddingBottom = "16px";
+    viewEl.innerHTML = renderMainMenuScreen();
+    return;
+  }
 
-  // Bottom Nav
-  const bNav = document.getElementById("bottom-nav");
-  bNav.innerHTML = Object.keys(NAV_CONFIG).map(k => {
-    const item = NAV_CONFIG[k];
-    return `<div class="nav-item ${k === currentSection ? 'active' : ''}" onclick="setSection('${k}')">
-      <span class="nav-icon">${item.icon}</span>${item.label}
-    </div>`;
-  }).join("");
+  headerEl.style.display = "flex";
+  bottomNavEl.style.display = "flex";
+  viewEl.style.paddingBottom = "86px";
 
-  // Main View Router
-  const view = document.getElementById("app-view");
-  view.innerHTML = renderCurrentTab();
+  // Set Header Title & Top Tabs based on current screen
+  const topTabsConfig = getTopTabsForCurrent();
+  document.getElementById("hdr-title-text").textContent = topTabsConfig.title;
+  if (topTabsConfig.tabs.length > 0) {
+    topTabsEl.style.display = "flex";
+    topTabsEl.innerHTML = topTabsConfig.tabs.map(t => `
+      <div class="top-tab ${currentSub === t.id ? 'active' : ''}" onclick="currentSub='${t.id}';render();">${t.label}</div>
+    `).join("");
+  } else {
+    topTabsEl.style.display = "none";
+  }
+
+  // Render 5-Tab Bottom Navigation Bar (Dashboard | Inbox | Squad | Schedule | Club)
+  const bTabs = [
+    { id: "dashboard", label: "Dashboard", icon: "⏱️" },
+    { id: "inbox", label: "Inbox", icon: "✉️" },
+    { id: "squad", label: "Squad", icon: "👥" },
+    { id: "schedule", label: "Schedule", icon: "📅" },
+    { id: "club", label: "Club", icon: "🛡️" }
+  ];
+  bottomNavEl.innerHTML = bTabs.map(b => `
+    <div class="bnav-item ${currentTab === b.id ? 'active' : ''}" onclick="navigate('${b.id}')">
+      <span class="bnav-icon">${b.icon}</span>
+      <span>${b.label}</span>
+    </div>
+  `).join("");
+
+  // Render Screen Body
+  switch (currentSub) {
+    case "new_game": viewEl.innerHTML = renderNewGameScreen(); break;
+    case "load_game": viewEl.innerHTML = renderLoadGameScreen(); break;
+    case "achievements": viewEl.innerHTML = renderAchievementsScreen(); break;
+    case "overview": viewEl.innerHTML = renderDashboardScreen(); break;
+    case "inbox": viewEl.innerHTML = renderInboxScreen(); break;
+    case "management": viewEl.innerHTML = renderSquadManagementScreen(); break;
+    case "roster": viewEl.innerHTML = renderSquadRosterScreen(); break;
+    case "tactics": viewEl.innerHTML = renderTacticsScreen(); break;
+    case "staff": viewEl.innerHTML = renderStaffTrainingScreen(); break;
+    case "market": viewEl.innerHTML = renderTransferMarketScreen(); break;
+    case "negotiations": viewEl.innerHTML = renderNegotiationsScreen(); break;
+    case "contracts": viewEl.innerHTML = renderContractsScreen(); break;
+    case "fixtures": viewEl.innerHTML = renderMatchesFixturesScreen(); break;
+    case "results": viewEl.innerHTML = renderResultsScreen(); break;
+    case "table": viewEl.innerHTML = renderLeagueTableScreen(); break;
+    case "other_comps": viewEl.innerHTML = renderAllCompetitionsExplorer(); break;
+    case "live_match": viewEl.innerHTML = renderLiveMatchScreen(); break;
+    case "club_overview": viewEl.innerHTML = renderClubOverviewScreen(); break;
+    case "ed_home": viewEl.innerHTML = renderEditorHomeScreen(); break;
+    case "ed_clubs": viewEl.innerHTML = renderEditorClubsScreen(); break;
+    case "ed_players": viewEl.innerHTML = renderEditorPlayersScreen(); break;
+    default: viewEl.innerHTML = renderDashboardScreen();
+  }
 }
 
-function renderCurrentTab() {
-  const userTeam = getUserTeam();
-  switch (currentSubTab) {
-    case "home": return renderMainMenu();
-    case "new_game": return renderNewGameSetup();
-    case "load_save": return renderSaveLoadSlots();
-    case "settings": return renderSettings();
-    case "overview": return renderDashboard(userTeam);
-    case "inbox": return renderInbox();
-    case "staff": return renderStaff(userTeam);
-    case "youth": return renderYouthAcademy(userTeam);
-    case "facilities": return renderFacilities(userTeam);
-    case "board": return renderBoardObjectives(userTeam);
-    case "season_summary": return renderSeasonSummary();
-    case "list": return renderSquadList(userTeam);
-    case "lineup": return renderLineupBench(userTeam);
-    case "tactics": return renderTactics(userTeam);
-    case "training": return renderTraining(userTeam);
-    case "profile": return renderPlayerProfile();
-    case "fixtures": return renderFixtures(userTeam);
-    case "pre_match": return renderPreMatch(userTeam);
-    case "live_match": return renderLiveMatch(userTeam);
-    case "post_match": return renderPostMatch();
-    case "table": return renderLeagueTable(userTeam);
-    case "cups": return renderCups();
-    case "stats_awards": return renderStatsAwards();
-    case "market": return renderTransferMarket(userTeam);
-    case "scouting": return renderScouting(userTeam);
-    case "negotiations": return renderNegotiations(userTeam);
-    case "contracts": return renderContracts(userTeam);
-    case "finances": return renderFinances(userTeam);
-    case "ed_home": return renderEditorHome();
-    case "ed_teams": return renderEditorTeams();
-    case "ed_players": return renderEditorPlayers();
-    case "ed_leagues": return renderEditorLeaguesRules();
-    case "ed_media": return renderEditorMedia();
-    case "ed_import_export": return renderEditorImportExport();
-    case "ed_extras": return renderEditorExtras();
-    default: return renderDashboard(userTeam);
+function getTopTabsForCurrent() {
+  if (currentTab === "dashboard") return { title: "DASHBOARD", tabs: [] };
+  if (currentTab === "inbox") {
+    if (currentSub === "negotiations") return { title: "NEGOTIATIONS", tabs: [] };
+    if (currentSub === "contracts") return { title: "CONTRACTS & RENEWALS", tabs: [] };
+    return { title: "NEWS & INBOX", tabs: [
+      { id: "inbox", label: "Inbox" },
+      { id: "negotiations", label: "Negotiations" },
+      { id: "contracts", label: "Contracts" }
+    ]};
   }
+  if (currentTab === "squad") {
+    if (currentSub === "roster") return { title: "SQUAD ROSTER", tabs: [
+      { id: "tactics", label: "Tactics" },
+      { id: "management", label: "Squad" },
+      { id: "roster", label: "Roster" },
+      { id: "market", label: "Transfers" }
+    ]};
+    if (currentSub === "market") return { title: "TRANSFER MARKET", tabs: [
+      { id: "tactics", label: "Tactics" },
+      { id: "management", label: "Squad" },
+      { id: "staff", label: "Staff" },
+      { id: "market", label: "Transfers" }
+    ]};
+    return { title: "SQUAD MANAGEMENT", tabs: [
+      { id: "tactics", label: "Tactics" },
+      { id: "management", label: "Squad" },
+      { id: "staff", label: "Staff" },
+      { id: "market", label: "Transfers" }
+    ]};
+  }
+  if (currentTab === "schedule") {
+    const title = currentSub === "table" ? "LEAGUE TABLE" : currentSub === "other_comps" ? "WORLD COMPETITIONS" : "MATCHES & FIXTURES";
+    return { title, tabs: [
+      { id: "fixtures", label: "Schedule" },
+      { id: "results", label: "Results" },
+      { id: "table", label: "Table" },
+      { id: "other_comps", label: "Competitions" }
+    ]};
+  }
+  if (currentTab === "club") {
+    return { title: "CLUB OVERVIEW", tabs: [
+      { id: "club_overview", label: "Overview" },
+      { id: "contracts", label: "Contracts" },
+      { id: "ed_home", label: "Editor" }
+    ]};
+  }
+  if (currentTab === "editor") {
+    return { title: "DATABASE EDITOR", tabs: [
+      { id: "ed_home", label: "DB Home" },
+      { id: "ed_clubs", label: "Clubs (156)" },
+      { id: "ed_players", label: "Players" }
+    ]};
+  }
+  return { title: "FOOTBALL MANAGER", tabs: [] };
 }
 
-/* 1. MAIN MENU, NEW GAME, SAVE/LOAD, SETTINGS */
-function renderMainMenu() {
+/* ============================================================================
+   SCREEN 1: MAIN MENU (MATCHING UPLOADED IMAGE 1000158392_30f07c.jpg)
+   ============================================================================ */
+function renderMainMenuScreen() {
   return `
-    <div class="card" style="text-align:center;padding:22px 14px;">
-      <div style="font-size:24px;font-weight:900;color:var(--accent);">FM DYNASTY MANAGER 26</div>
-      <div style="font-size:12px;color:var(--muted);margin:6px 0 16px;">Complete Offline Mobile Football Management & Built-In Database Studio</div>
-      <button class="btn btn-block" onclick="setSection('dashboard','overview')">▶ Continue Career (${getUserTeam().name})</button>
-      <button class="btn btn-blue btn-block" onclick="setSection('menu','new_game')">➕ New Career Setup</button>
-      <button class="btn btn-sec btn-block" onclick="setSection('menu','load_save')">💾 Save / Load Slots</button>
-      <button class="btn btn-warn btn-block" onclick="setSection('editor','ed_home')">🛠️ Built-In Database & Media Editor</button>
-      <button class="btn btn-sec btn-block" onclick="setSection('menu','settings')">⚙️ System Settings</button>
+    <div style="min-height:94vh;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:36px 12px 24px;text-align:center;">
+      <!-- Metallic / Neon Cyan FOOTBALL MANAGER 2D Logo -->
+      <div style="margin-top:20px;">
+        <div style="display:inline-block;padding:12px 22px;border-radius:14px;background:rgba(10,18,34,0.92);border:2px solid #2dd4bf;">
+          <div style="font-size:32px;font-weight:900;font-style:italic;letter-spacing:1.5px;background:linear-gradient(180deg,#67e8f9,#0284c7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+            FOOTBALL ⚽
+          </div>
+          <div style="font-size:30px;font-weight:900;font-style:italic;letter-spacing:2px;color:#f8fafc;margin-top:-6px;">
+            MANAGER
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--neon-cyan);margin-top:6px;font-weight:700;">2026 WORLD EDITION • 8 LEAGUES • 156 REAL-SIZE CLUBS</div>
+      </div>
+
+      <!-- 4 Neon Double-Border Buttons -->
+      <div style="width:100%;max-width:360px;margin:20px 0;">
+        <div class="menu-btn" onclick="navigate('dashboard','overview')">
+          <span>Continue (${getUserClub().name})</span>
+          <span style="color:#38bdf8;">▶</span>
+        </div>
+        <div class="menu-btn" onclick="navigate('menu','new_game')">
+          <span>New Game</span>
+          <span style="color:#38bdf8;">📢</span>
+        </div>
+        <div class="menu-btn green" onclick="navigate('menu','load_game')">
+          <span>Load Game</span>
+          <span style="color:#22c55e;">📁</span>
+        </div>
+        <div class="menu-btn teal" onclick="navigate('editor','ed_home')">
+          <span>Editor</span>
+          <span style="color:#2dd4bf;">⚙️</span>
+        </div>
+        <div class="menu-btn gold" onclick="navigate('menu','achievements')">
+          <span>Achievement</span>
+          <span style="color:#eab308;">🏆</span>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--text-muted);">Offline Mobile Port • All Competitions Unlocked</div>
     </div>
   `;
 }
 
-function renderNewGameSetup() {
+function renderNewGameScreen() {
+  const selectedLg = state.leagues.find(l => l.id === viewedCompetitionId) || state.leagues[0];
+  const clubsInLg = state.clubs.filter(c => c.leagueId === selectedLg.id);
   return `
-    <div class="card">
-      <div class="card-title">New Career Setup</div>
-      <label>Manager Name</label>
-      <input id="ng-name" value="${state.manager.name}" />
-      <label>Nationality</label>
-      <select id="ng-nat">
-        ${Object.keys(FAKE_NAMES).map(n => `<option value="${n}" ${state.manager.nationality === n ? 'selected' : ''}>${n}</option>`).join("")}
+    <div class="fm-card">
+      <div class="fm-card-header">Select Nation & League (${state.leagues.length} Full Leagues)</div>
+      <select onchange="viewedCompetitionId=this.value;render();">
+        ${state.leagues.map(l => `<option value="${l.id}" ${l.id === selectedLg.id ? 'selected' : ''}>${l.flag} ${l.name} (${state.clubs.filter(c => c.leagueId === l.id).length} Clubs)</option>`).join("")}
       </select>
-      <label>Select Club (${state.teams.length} Clubs Available)</label>
-      <select id="ng-club">
-        ${state.teams.map(t => `<option value="${t.id}" ${t.id === state.manager.clubId ? 'selected' : ''}>${t.name} (${t.leagueId === 'lg_1' ? 'Tier 1' : 'Tier 2'} - Budget: ${formatMoney(t.budget)})</option>`).join("")}
+      <label style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block;">Select Club to Manage</label>
+      <select id="new-club-sel">
+        ${clubsInLg.map(c => `<option value="${c.id}" ${c.id === state.userClubId ? 'selected' : ''}>${c.name} (Budget: ${fmtMoney(c.budget)} • Rep: ${c.rep})</option>`).join("")}
       </select>
-      <label>Difficulty</label>
-      <select id="ng-diff">
-        <option value="Easy">Easy (Generous Board & High Budget)</option>
-        <option value="Normal" selected>Normal (Balanced Simulation)</option>
-        <option value="Hard">Hard (Strict Board & Tough AI)</option>
-      </select>
-      <button class="btn btn-block" onclick="startNewCareer()">Start Career</button>
+      <div class="cta-btn" onclick="startNewClubCareer()"><span>START CAREER ⟫</span></div>
     </div>
   `;
 }
 
-function startNewCareer() {
-  const name = document.getElementById("ng-name").value || "Manager";
-  const nat = document.getElementById("ng-nat").value;
-  const clubId = document.getElementById("ng-club").value;
-  const diff = document.getElementById("ng-diff").value;
-  state = buildStarterDatabase();
-  state.manager.name = name;
-  state.manager.nationality = nat;
-  state.manager.clubId = clubId;
-  state.manager.difficulty = diff;
-  saveState();
-  setSection("dashboard", "overview");
+function startNewClubCareer() {
+  const cid = document.getElementById("new-club-sel").value;
+  state.userClubId = cid;
+  const club = getUserClub();
+  viewedCompetitionId = club.leagueId;
+  saveGame();
+  navigate("dashboard", "overview");
 }
 
-function renderSaveLoadSlots() {
-  const raw = localStorage.getItem(DB_SLOTS_KEY);
+function renderLoadGameScreen() {
+  const raw = localStorage.getItem(SLOTS_KEY);
   const slots = raw ? JSON.parse(raw) : {};
   return `
-    <div class="card">
-      <div class="card-title">Save / Load Career Slots</div>
-      ${[1, 2, 3].map(slot => {
-        const info = slots["slot_" + slot];
-        return `<div class="card" style="background:var(--card-alt);">
-          <div class="row-between">
-            <div>
-              <div style="font-weight:700;">Slot ${slot}: ${info ? info.clubName : 'Empty Slot'}</div>
-              <div style="font-size:11px;color:var(--muted);">${info ? `Season ${info.season} Wk ${info.week} • Saved ${info.date}` : 'No data saved'}</div>
-            </div>
-            <div style="display:flex;gap:5px;">
-              <button class="btn" onclick="saveToSlot(${slot})">Save</button>
-              ${info ? `<button class="btn btn-blue" onclick="loadFromSlot(${slot})">Load</button>` : ''}
-            </div>
+    <div class="fm-card">
+      <div class="fm-card-header">Save / Load Career Slots</div>
+      ${[1, 2, 3].map(s => {
+        const slot = slots["s" + s];
+        return `<div class="fm-subbox row-between">
+          <div>
+            <div style="font-weight:800;">Slot ${s}: ${slot ? slot.clubName : 'Empty'}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${slot ? `Week ${slot.week} • ${slot.time}` : 'No save'}</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="sm-btn" onclick="saveSlot(${s})">Save</button>
+            ${slot ? `<button class="sm-btn sec" onclick="loadSlot(${s})">Load</button>` : ''}
           </div>
         </div>`;
       }).join("")}
@@ -535,1482 +801,1062 @@ function renderSaveLoadSlots() {
   `;
 }
 
-function saveToSlot(slot) {
-  const raw = localStorage.getItem(DB_SLOTS_KEY);
+function saveSlot(s) {
+  const raw = localStorage.getItem(SLOTS_KEY);
   const slots = raw ? JSON.parse(raw) : {};
-  slots["slot_" + slot] = {
-    clubName: getUserTeam().name,
-    season: state.season,
-    week: state.week,
-    date: new Date().toLocaleTimeString(),
-    data: state
-  };
-  localStorage.setItem(DB_SLOTS_KEY, JSON.stringify(slots));
-  renderApp();
+  slots["s" + s] = { clubName: getUserClub().name, week: state.week, time: new Date().toLocaleTimeString(), data: state };
+  localStorage.setItem(SLOTS_KEY, JSON.stringify(slots));
+  render();
 }
 
-function loadFromSlot(slot) {
-  const raw = localStorage.getItem(DB_SLOTS_KEY);
+function loadSlot(s) {
+  const raw = localStorage.getItem(SLOTS_KEY);
   const slots = raw ? JSON.parse(raw) : {};
-  if (slots["slot_" + slot]) {
-    state = slots["slot_" + slot].data;
-    saveState();
-    setSection("dashboard", "overview");
+  if (slots["s" + s]) {
+    state = slots["s" + s].data;
+    saveGame();
+    navigate("dashboard", "overview");
   }
 }
 
-function renderSettings() {
+function renderAchievementsScreen() {
+  const c = getUserClub();
   return `
-    <div class="card">
-      <div class="card-title">System & Currency Settings</div>
-      <label>Currency Symbol</label>
-      <select onchange="state.meta.currency=this.value;saveState();renderApp();">
-        ${["€", "£", "$"].map(c => `<option value="${c}" ${state.meta.currency === c ? 'selected' : ''}>${c}</option>`).join("")}
-      </select>
-      <button class="btn btn-danger btn-block" onclick="localStorage.clear();state=buildStarterDatabase();renderApp();">Reset All App Storage to Factory Default</button>
+    <div class="fm-card">
+      <div class="fm-card-header">Manager Achievements & Hall of Fame</div>
+      <div class="fm-subbox">🏆 <strong>Domestic Champion</strong> — Win any Top-Flight League (${c.trophiesLeague} Club Titles)</div>
+      <div class="fm-subbox">🌍 <strong>Continental King</strong> — Win the Champions Cup (${c.trophiesCont} Club Titles)</div>
+      <div class="fm-subbox">💰 <strong>Transfer Tycoon</strong> — Complete a £50M+ blockbuster signing</div>
+      <div class="fm-subbox">🌐 <strong>Globe Trotter</strong> — Manage clubs across England, Spain, Italy, Germany, France, Algeria, or Brazil</div>
     </div>
   `;
 }
 
-/* 2. DASHBOARD, INBOX, STAFF, YOUTH, FACILITIES, BOARD */
-function renderDashboard(team) {
-  const nextFix = state.fixtures.find(f => !f.played && (f.homeId === team.id || f.awayId === team.id));
-  const opp = nextFix ? getTeamById(nextFix.homeId === team.id ? nextFix.awayId : nextFix.homeId) : null;
-  const injured = getTeamPlayers(team.id).filter(p => p.injuredWeeks > 0);
+/* ============================================================================
+   SCREEN 2: DASHBOARD (MATCHING UPLOADED IMAGE 1000158361_30f07c.jpg)
+   ============================================================================ */
+function renderDashboardScreen() {
+  const club = getUserClub();
+  const lg = state.leagues.find(l => l.id === club.leagueId) || state.leagues[0];
+  const nextFix = state.fixtures.find(f => !f.played && (f.homeId === club.id || f.awayId === club.id));
+  const opp = nextFix ? getClub(nextFix.homeId === club.id ? nextFix.awayId : nextFix.homeId) : getClub(state.clubs[1].id);
+
+  // Calculate current league position
+  const standings = state.clubs.filter(c => c.leagueId === club.leagueId).sort((a, b) => (b.stats.pts - a.stats.pts) || ((b.stats.gf - b.stats.ga) - (a.stats.gf - a.stats.ga)));
+  const posIdx = standings.findIndex(c => c.id === club.id) + 1;
+  const ord = posIdx === 1 ? "1st" : posIdx === 2 ? "2nd" : posIdx === 3 ? "3rd" : `${posIdx}th`;
 
   return `
-    <div class="card">
-      <div class="card-title">Next Matchday (Week ${state.week})</div>
-      ${nextFix ? `
-        <div class="row-between" style="padding:8px 0;">
-          <div style="text-align:center;flex:1;">
-            ${render2DCrestSVG(team, 42)}
-            <div style="font-weight:700;font-size:13px;margin-top:4px;">${team.name}</div>
-          </div>
-          <div style="font-weight:900;font-size:16px;color:var(--accent);">VS</div>
-          <div style="text-align:center;flex:1;">
-            ${render2DCrestSVG(opp, 42)}
-            <div style="font-weight:700;font-size:13px;margin-top:4px;">${opp.name}</div>
-          </div>
+    <!-- NEXT MATCH CARD -->
+    <div class="fm-card" style="text-align:center;">
+      <div style="font-size:15px;font-weight:800;letter-spacing:0.8px;margin-bottom:10px;">NEXT MATCH</div>
+      <div class="row-between" style="justify-content:space-around;margin-bottom:8px;">
+        <div style="flex:1;text-align:center;">
+          ${render2DCrest(club, 52)}
+          <div style="font-weight:800;font-size:12px;margin-top:6px;text-transform:uppercase;">${club.name}</div>
         </div>
-        <button class="btn btn-block" onclick="setSection('matches','pre_match')">⚽ Go to Pre-Match & Play</button>
-      ` : `<div>Season fixtures complete! Advance week to trigger end-of-season ceremony.</div>`}
-    </div>
-
-    <div class="grid-3" style="margin-bottom:10px;">
-      <div class="stat-box">
-        <div class="stat-val">${formatMoney(team.budget)}</div>
-        <div class="stat-lbl">Transfer Budget</div>
+        <div style="font-size:22px;font-weight:900;font-style:italic;color:#cbd5e1;">VS</div>
+        <div style="flex:1;text-align:center;">
+          ${render2DCrest(opp, 52)}
+          <div style="font-weight:800;font-size:12px;margin-top:6px;text-transform:uppercase;">${opp.name}</div>
+        </div>
       </div>
-      <div class="stat-box">
-        <div class="stat-val">${state.manager.boardConfidence}%</div>
-        <div class="stat-lbl">Board Mood</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-val">${team.stats.form.slice(-5).join("") || "-----"}</div>
-        <div class="stat-lbl">Recent Form</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">${lg.name} • Saturday, 15:00</div>
+      <div class="cta-btn" style="width:72%;padding:10px;" onclick="launchLiveMatch()">
+        <span>PLAY MATCH ⟫</span>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">Club Snapshot & Tasks</div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6;">
-        • Injured Players: <strong style="color:var(--text);">${injured.length}</strong><br/>
-        • Training Focus: <strong style="color:var(--text);">${team.training.focus} (${team.training.intensity})</strong><br/>
-        • Unread Inbox Messages: <strong style="color:var(--accent);">${state.inbox.filter(m => !m.read).length}</strong>
-      </div>
-    </div>
-  `;
-}
-
-function renderInbox() {
-  return `
-    <div class="card">
-      <div class="card-title">Club Inbox (${state.inbox.length})</div>
-      ${state.inbox.slice().reverse().map(m => `
-        <div class="card" style="background:var(--card-alt);" onclick="m.read=true;saveState();">
-          <div class="row-between">
-            <span class="badge">${m.category} • Wk ${m.week}</span>
-            <button class="btn btn-sec" style="padding:3px 8px;" onclick="setSection('transfers','market')">Action</button>
+    <!-- NEWS & INBOX -->
+    <div style="font-size:14px;font-weight:800;margin:6px 0 6px 4px;letter-spacing:0.6px;">NEWS & INBOX</div>
+    <div class="fm-card" style="padding:8px;">
+      ${state.inbox.slice(0, 2).map(m => `
+        <div class="fm-subbox row-between" style="margin-bottom:6px;cursor:pointer;" onclick="navigate('inbox','inbox')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">${m.type === 'Scout' ? '✉️' : '📰'}</span>
+            <span style="font-size:12px;font-weight:600;">${m.title}</span>
           </div>
-          <div style="font-weight:700;margin:5px 0 3px;">${m.title}</div>
-          <div style="font-size:12px;color:var(--muted);">${m.body}</div>
+          ${m.unread ? `<span style="width:9px;height:9px;border-radius:50%;background:#38bdf8;flex-shrink:0;"></span>` : ''}
         </div>
       `).join("")}
     </div>
-  `;
-}
 
-function renderStaff(team) {
-  const clubStaff = state.staff.filter(s => s.teamId === team.id);
-  const freeStaff = state.staff.filter(s => s.teamId === "FREE");
-  return `
-    <div class="card">
-      <div class="card-title">Current Club Staff</div>
-      ${clubStaff.map(s => `
-        <div class="row-between" style="padding:6px 0;border-bottom:1px solid #1e293b;">
-          <div>
-            <div style="font-weight:700;">${s.name} <span class="badge">${s.role}</span></div>
-            <div style="font-size:11px;color:var(--muted);">Rating: ${s.rating} • Wage: ${formatMoney(s.wage)}/wk</div>
-          </div>
-          <button class="btn btn-danger" onclick="fireStaff('${s.id}')">Fire</button>
+    <!-- CLUB STATUS -->
+    <div style="font-size:14px;font-weight:800;margin:6px 0 6px 4px;letter-spacing:0.6px;">CLUB STATUS</div>
+    <div class="fm-card">
+      <div class="grid-2" style="text-align:center;">
+        <div style="border-right:1px solid #334155;padding-right:6px;">
+          <div style="font-size:11px;color:var(--text-muted);">FINANCES</div>
+          <div style="font-size:24px;font-weight:900;color:#4ade80;margin:4px 0;">${fmtMoney(club.budget * 1.4)}</div>
+          <div style="font-size:11px;color:var(--text-muted);">Transfer Budget: ${fmtMoney(club.budget)}</div>
         </div>
-      `).join("")}
-    </div>
-    <div class="card">
-      <div class="card-title">Available Staff Market</div>
-      ${freeStaff.map(s => `
-        <div class="row-between" style="padding:6px 0;border-bottom:1px solid #1e293b;">
-          <div>
-            <div style="font-weight:700;">${s.name} <span class="badge">${s.role}</span></div>
-            <div style="font-size:11px;color:var(--muted);">Rating: ${s.rating} • Wage: ${formatMoney(s.wage)}/wk</div>
-          </div>
-          <button class="btn" onclick="hireStaff('${s.id}')">Hire</button>
+        <div style="padding-left:6px;cursor:pointer;" onclick="viewedCompetitionId='${club.leagueId}';navigate('schedule','table')">
+          <div style="font-size:11px;color:var(--text-muted);">LEAGUE POSITION</div>
+          <div style="font-size:24px;font-weight:900;color:#facc15;margin:4px 0;">${ord}</div>
+          <div style="font-size:11px;color:var(--text-muted);">${lg.name}</div>
         </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function hireStaff(id) {
-  const s = state.staff.find(x => x.id === id);
-  if (s) s.teamId = getUserTeam().id;
-  saveState();
-  renderApp();
-}
-
-function fireStaff(id) {
-  const s = state.staff.find(x => x.id === id);
-  if (s) s.teamId = "FREE";
-  saveState();
-  renderApp();
-}
-
-function renderYouthAcademy(team) {
-  return `
-    <div class="card">
-      <div class="card-title">Youth Academy (Level ${team.youthLevel}/5)</div>
-      ${state.youthCandidates.map(p => `
-        <div class="row-between" style="padding:8px 0;border-bottom:1px solid #1e293b;">
-          <div>
-            <div style="font-weight:700;"><span class="pos-${p.pos}">${p.pos}</span> ${p.name} (Age ${p.age})</div>
-            <div style="font-size:11px;color:var(--muted);">OVR: ${p.ovr} • Potential: ${p.pot} • ${p.nationality}</div>
-          </div>
-          <button class="btn" onclick="promoteYouth('${p.id}')">Promote</button>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function promoteYouth(id) {
-  const idx = state.youthCandidates.findIndex(p => p.id === id);
-  if (idx > -1) {
-    const p = state.youthCandidates.splice(idx, 1)[0];
-    p.teamId = getUserTeam().id;
-    state.players.push(p);
-    getUserTeam().bench.push(p.id);
-    saveState();
-    renderApp();
-  }
-}
-
-function renderFacilities(team) {
-  return `
-    <div class="card">
-      <div class="card-title">Stadium & Club Facilities</div>
-      <div style="font-size:13px;margin-bottom:10px;">
-        <strong>${team.stadiumName}</strong> • Capacity: ${team.stadiumCapacity.toLocaleString()} seats<br/>
-        Training Facilities: Level ${team.facilitiesLevel}/5 • Youth Recruitment: Level ${team.youthLevel}/5
       </div>
-      <button class="btn btn-block" onclick="upgradeFacility('stadium')">🏟️ Expand Stadium (+5,000 Seats - €4.5M)</button>
-      <button class="btn btn-blue btn-block" onclick="upgradeFacility('training')">🏋️ Upgrade Training Center (€3.0M)</button>
-      <button class="btn btn-sec btn-block" onclick="upgradeFacility('youth')">🌱 Upgrade Youth Academy (€2.5M)</button>
     </div>
-  `;
-}
 
-function upgradeFacility(type) {
-  const team = getUserTeam();
-  if (type === "stadium" && team.budget >= 4500000) {
-    team.budget -= 4500000;
-    team.stadiumCapacity += 5000;
-  } else if (type === "training" && team.budget >= 3000000 && team.facilitiesLevel < 5) {
-    team.budget -= 3000000;
-    team.facilitiesLevel++;
-  } else if (type === "youth" && team.budget >= 2500000 && team.youthLevel < 5) {
-    team.budget -= 2500000;
-    team.youthLevel++;
-  }
-  saveState();
-  renderApp();
-}
-
-function renderBoardObjectives(team) {
-  return `
-    <div class="card">
-      <div class="card-title">Board Confidence & Job Market</div>
-      <div style="margin-bottom:10px;">
-        Board Confidence: <strong>${state.manager.boardConfidence}%</strong>
-        <div class="progress-bar"><div class="progress-fill" style="width:${state.manager.boardConfidence}%"></div></div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
-        • Primary Objective: Finish Top 4 in ${team.leagueId === 'lg_1' ? 'Premier Division' : 'Championship'}<br/>
-        • Financial Objective: Keep positive transfer balance
-      </div>
-      <div class="card-title">Job Market (Apply to Switch Club)</div>
-      ${state.teams.slice(0, 6).map(t => `
-        <div class="row-between" style="padding:5px 0;border-bottom:1px solid #1e293b;">
-          <div>${render2DCrestSVG(t, 20)} <strong>${t.name}</strong> (Rep: ${t.reputation})</div>
-          <button class="btn btn-sec" onclick="state.manager.clubId='${t.id}';saveState();renderApp();">Take Job</button>
+    <!-- QUICK LINKS -->
+    <div style="font-size:14px;font-weight:800;margin:6px 0 6px 4px;letter-spacing:0.6px;">QUICK LINKS</div>
+    <div class="fm-card" style="padding:8px;">
+      <div class="grid-4">
+        <div class="fm-subbox" style="text-align:center;margin:0;cursor:pointer;" onclick="navigate('squad','tactics')">
+          <div style="font-size:20px;color:var(--neon-cyan);">📋</div>
+          <div style="font-size:9px;font-weight:800;margin-top:4px;">TACTICS</div>
         </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function renderSeasonSummary() {
-  return `
-    <div class="card">
-      <div class="card-title">Dynasty History & Trophy Cabinet</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Trophies Won: ${state.manager.trophies.length ? state.manager.trophies.join(", ") : "None yet — complete a season!"}</div>
-      ${state.manager.seasonHistory.map(h => `
-        <div class="card" style="background:var(--card-alt);">
-          <strong>Season ${h.season}</strong> • Champion: ${h.champion} • Cup Winner: ${h.cupWinner}
+        <div class="fm-subbox" style="text-align:center;margin:0;cursor:pointer;" onclick="navigate('squad','market')">
+          <div style="font-size:20px;color:var(--neon-cyan);">💷</div>
+          <div style="font-size:9px;font-weight:800;margin-top:4px;">TRANSFERS</div>
         </div>
-      `).join("")}
+        <div class="fm-subbox" style="text-align:center;margin:0;cursor:pointer;" onclick="navigate('squad','staff')">
+          <div style="font-size:20px;color:var(--neon-cyan);">📢</div>
+          <div style="font-size:9px;font-weight:800;margin-top:4px;">TRAINING</div>
+        </div>
+        <div class="fm-subbox" style="text-align:center;margin:0;cursor:pointer;" onclick="navigate('schedule','other_comps')">
+          <div style="font-size:20px;color:var(--neon-cyan);">🌍</div>
+          <div style="font-size:9px;font-weight:800;margin-top:4px;">LEAGUES</div>
+        </div>
+      </div>
     </div>
   `;
 }
 
-/* 3. SQUAD, PLAYER PROFILE (RADAR CHART), LINEUP, TACTICS, TRAINING */
-let squadPosFilter = "ALL";
-let squadSortBy = "ovr";
+/* ============================================================================
+   SCREEN 3: SQUAD MANAGEMENT & 2D PITCH (MATCHING 1000158363_30f07c.jpg)
+   ============================================================================ */
+const PITCH_433 = [
+  [50, 86, 1],
+  [16, 63, 17], [38, 66, 11], [62, 66, 15], [84, 63, 13],
+  [26, 40, 13], [50, 43, 6], [74, 40, 10],
+  [20, 16, 26], [50, 12, 9], [80, 16, 16]
+];
 
-function renderSquadList(team) {
-  let list = getTeamPlayers(team.id);
-  if (squadPosFilter !== "ALL") list = list.filter(p => p.pos === squadPosFilter);
-  list.sort((a, b) => b[squadSortBy] - a[squadSortBy]);
+function renderSquadManagementScreen() {
+  const club = getUserClub();
+  const squad = getClubPlayers(club.id);
+  const starters = squad.slice(0, 11);
 
   return `
-    <div class="card">
-      <div class="row-between" style="margin-bottom:8px;">
-        <select style="margin:0;" onchange="squadPosFilter=this.value;renderApp();">
-          <option value="ALL" ${squadPosFilter === 'ALL' ? 'selected' : ''}>All Positions</option>
-          <option value="GK" ${squadPosFilter === 'GK' ? 'selected' : ''}>GK</option>
-          <option value="DEF" ${squadPosFilter === 'DEF' ? 'selected' : ''}>DEF</option>
-          <option value="MID" ${squadPosFilter === 'MID' ? 'selected' : ''}>MID</option>
-          <option value="FWD" ${squadPosFilter === 'FWD' ? 'selected' : ''}>FWD</option>
-        </select>
-        <select style="margin:0;" onchange="squadSortBy=this.value;renderApp();">
-          <option value="ovr" ${squadSortBy === 'ovr' ? 'selected' : ''}>Sort: OVR</option>
-          <option value="value" ${squadSortBy === 'value' ? 'selected' : ''}>Sort: Value</option>
-          <option value="age" ${squadSortBy === 'age' ? 'selected' : ''}>Sort: Age</option>
-        </select>
+    <div style="text-align:center;font-size:17px;font-weight:800;margin-bottom:6px;">${club.formation || '4-3-3'}</div>
+    <div class="pitch-container">
+      <div class="pitch-box-top"></div>
+      <div class="pitch-mid"></div>
+      <div class="pitch-circle"></div>
+      <div class="pitch-box-bot"></div>
+      ${starters.map((p, idx) => {
+        const [x, y, num] = PITCH_433[idx] || [50, 50, idx + 1];
+        const isGK = idx === 0;
+        return `<div class="pitch-player" style="left:${x}%;top:${y}%;" onclick="openContractForPlayer('${p.id}')">
+          ${render2DKit(isGK ? '#16a34a' : club.c1, club.c2, num, 34)}
+          <div class="pitch-label">${p.name.substring(0, 6)} (${p.ovr})</div>
+        </div>`;
+      }).join("")}
+    </div>
+
+    <div class="fm-card">
+      <div class="fm-card-header">
+        <span>PLAYER ROSTER</span>
+        <button class="sm-btn sec" onclick="currentSub='roster';render();">Full Roster View</button>
       </div>
       <table>
-        <thead><tr><th>Pos</th><th>Player</th><th>Age</th><th>OVR</th><th>Morale</th><th>Value</th></tr></thead>
+        <thead>
+          <tr><th>POS</th><th>NAME</th><th>MORALE</th><th>FIT</th><th>OVR</th></tr>
+        </thead>
         <tbody>
-          ${list.map(p => `
-            <tr onclick="selectedPlayerId='${p.id}';setSection('squad','profile');" style="cursor:pointer;">
-              <td><span class="pos-${p.pos}">${p.pos}</span></td>
-              <td><strong>${p.name}</strong> ${p.injuredWeeks > 0 ? '🚑' : ''} ${p.transferListed ? '🏷️' : ''}</td>
-              <td>${p.age}</td>
-              <td><span class="badge">${p.ovr}</span></td>
-              <td>${p.morale}%</td>
-              <td>${formatMoney(p.value)}</td>
+          ${squad.slice(0, 12).map(p => `
+            <tr onclick="swapSquadOrder('${p.id}')" style="background:${selectedSwapPlayerId === p.id ? 'rgba(45,212,191,0.2)' : 'transparent'};cursor:pointer;">
+              <td><span class="pos-tag pos-${p.pos}">${p.pos}</span></td>
+              <td style="font-weight:700;font-size:13px;">${p.name}</td>
+              <td style="font-size:16px;">${p.morale >= 85 ? '😊' : '😐'}</td>
+              <td>
+                <div class="fit-bar-bg">
+                  <div class="fit-bar-fill" style="width:${p.fit}%;background:${p.fit > 82 ? '#22c55e' : '#eab308'};"></div>
+                </div>
+              </td>
+              <td style="font-weight:900;font-size:14px;">${p.ovr}</td>
             </tr>
           `).join("")}
         </tbody>
       </table>
     </div>
-  `;
-}
 
-function renderRadarSVG(attr) {
-  const keys = ["pac", "sho", "pas", "dri", "def", "phy"];
-  const labels = ["PAC", "SHO", "PAS", "DRI", "DEF", "PHY"];
-  const cx = 90, cy = 90, r = 64;
-  const pts = keys.map((k, i) => {
-    const angle = (Math.PI * 2 * i) / keys.length - Math.PI / 2;
-    const val = (attr[k] || 60) / 100;
-    const x = cx + Math.cos(angle) * r * val;
-    const y = cy + Math.sin(angle) * r * val;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(" ");
-
-  const axisLines = labels.map((lbl, i) => {
-    const angle = (Math.PI * 2 * i) / keys.length - Math.PI / 2;
-    const x = cx + Math.cos(angle) * r;
-    const y = cy + Math.sin(angle) * r;
-    const lx = cx + Math.cos(angle) * (r + 16);
-    const ly = cy + Math.sin(angle) * (r + 16);
-    return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#334155" stroke-width="1"/>
-            <text x="${lx}" y="${ly + 3}" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="700">${lbl} ${attr[keys[i]]}</text>`;
-  }).join("");
-
-  return `<svg width="180" height="180" viewBox="0 0 180 180">
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e293b" stroke-width="1"/>
-    <circle cx="${cx}" cy="${cy}" r="${r * 0.66}" fill="none" stroke="#1e293b" stroke-width="1"/>
-    ${axisLines}
-    <polygon points="${pts}" fill="rgba(16,185,129,0.35)" stroke="#10b981" stroke-width="2"/>
-  </svg>`;
-}
-
-function renderPlayerProfile() {
-  const p = state.players.find(x => x.id === selectedPlayerId) || getTeamPlayers(getUserTeam().id)[0];
-  if (!p) return `<div class="card">No player selected.</div>`;
-  return `
-    <div class="card">
-      <div class="row-between">
-        <div>
-          <div style="font-size:17px;font-weight:800;">${p.name} <span class="badge">${p.ovr} OVR / ${p.pot} POT</span></div>
-          <div style="font-size:11px;color:var(--muted);">${p.pos} • ${p.nationality} • Age ${p.age} • ${p.foot} Foot</div>
-        </div>
-      </div>
-      <div style="text-align:center;margin:8px 0;">
-        ${renderRadarSVG(p.attr)}
-      </div>
-      <div class="grid-3" style="margin-bottom:10px;">
-        <div class="stat-box"><div class="stat-val">${formatMoney(p.value)}</div><div class="stat-lbl">Market Value</div></div>
-        <div class="stat-box"><div class="stat-val">${formatMoney(p.wage)}/wk</div><div class="stat-lbl">Wage (${p.contractYears}y)</div></div>
-        <div class="stat-box"><div class="stat-val">${p.stats.goals}G / ${p.stats.assists}A</div><div class="stat-lbl">Season Stats</div></div>
-      </div>
-      <div class="grid-2">
-        <button class="btn btn-sec" onclick="p_toggleTransfer('${p.id}')">${p.transferListed ? 'Remove from Transfer List' : '🏷️ Transfer List'}</button>
-        <button class="btn btn-sec" onclick="p_toggleLoan('${p.id}')">${p.loanListed ? 'Remove from Loan List' : '📋 Loan List'}</button>
-      </div>
+    <div class="cta-btn" onclick="currentSub='roster';render();">
+      <span>CONFIRM SQUAD ⟫</span>
     </div>
   `;
 }
 
-function p_toggleTransfer(id) {
-  const p = state.players.find(x => x.id === id);
-  if (p) p.transferListed = !p.transferListed;
-  saveState();
-  renderApp();
-}
-
-function p_toggleLoan(id) {
-  const p = state.players.find(x => x.id === id);
-  if (p) p.loanListed = !p.loanListed;
-  saveState();
-  renderApp();
-}
-
-function renderLineupBench(team) {
-  const starters = team.lineup.map(id => state.players.find(p => p.id === id)).filter(Boolean);
-  const subs = team.bench.map(id => state.players.find(p => p.id === id)).filter(Boolean);
-  return `
-    <div class="card">
-      <div class="card-title">Starting XI (Tap 2 players to swap)</div>
-      ${starters.map(p => `
-        <div class="row-between" style="padding:6px;background:${selectedBenchSwapId === p.id ? '#064e3b' : 'transparent'};border-bottom:1px solid #1e293b;" onclick="swapLineupPlayer('${p.id}')">
-          <div><span class="pos-${p.pos}">${p.pos}</span> <strong>${p.name}</strong></div>
-          <div><span class="badge">OVR ${p.ovr}</span> Fit ${p.fitness}%</div>
-        </div>
-      `).join("")}
-    </div>
-    <div class="card">
-      <div class="card-title">Substitutes Bench</div>
-      ${subs.map(p => `
-        <div class="row-between" style="padding:6px;background:${selectedBenchSwapId === p.id ? '#064e3b' : 'transparent'};border-bottom:1px solid #1e293b;" onclick="swapLineupPlayer('${p.id}')">
-          <div><span class="pos-${p.pos}">${p.pos}</span> <strong>${p.name}</strong></div>
-          <div><span class="badge">OVR ${p.ovr}</span> Fit ${p.fitness}%</div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function swapLineupPlayer(id) {
-  if (!selectedBenchSwapId) {
-    selectedBenchSwapId = id;
-    renderApp();
+function swapSquadOrder(pid) {
+  if (!selectedSwapPlayerId) {
+    selectedSwapPlayerId = pid;
+    render();
     return;
   }
-  const team = getUserTeam();
-  const all = [...team.lineup, ...team.bench];
-  const i1 = all.indexOf(selectedBenchSwapId);
-  const i2 = all.indexOf(id);
+  const i1 = state.players.findIndex(p => p.id === selectedSwapPlayerId);
+  const i2 = state.players.findIndex(p => p.id === pid);
   if (i1 > -1 && i2 > -1) {
-    const tmp = all[i1];
-    all[i1] = all[i2];
-    all[i2] = tmp;
-    team.lineup = all.slice(0, 11);
-    team.bench = all.slice(11);
+    const tmp = state.players[i1];
+    state.players[i1] = state.players[i2];
+    state.players[i2] = tmp;
   }
-  selectedBenchSwapId = null;
-  saveState();
-  renderApp();
+  selectedSwapPlayerId = null;
+  saveGame();
+  render();
 }
 
-const FORMATION_COORDS = {
-  "4-3-3": [[50,88], [18,70],[38,72],[62,72],[82,70], [28,48],[50,52],[72,48], [22,22],[50,18],[78,22]],
-  "4-4-2": [[50,88], [18,70],[38,72],[62,72],[82,70], [18,46],[38,48],[62,48],[82,46], [35,20],[65,20]],
-  "3-5-2": [[50,88], [26,72],[50,74],[74,72], [15,48],[33,50],[50,44],[67,50],[85,48], [35,20],[65,20]]
-};
-
-function renderTactics(team) {
-  const tac = team.tactics;
-  const coords = FORMATION_COORDS[tac.formation] || FORMATION_COORDS["4-3-3"];
-  const starters = team.lineup.map(id => state.players.find(p => p.id === id)).filter(Boolean);
+/* ============================================================================
+   SCREEN 4: SQUAD ROSTER (MATCHING UPLOADED IMAGE 1000158364_30f07c.jpg)
+   ============================================================================ */
+function renderSquadRosterScreen() {
+  const club = getUserClub();
+  const squad = getClubPlayers(club.id).filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return `
-    <div class="card">
-      <div class="card-title">Interactive Pitch & Formation (${tac.formation})</div>
-      <div class="pitch">
-        <div class="pitch-line-mid"></div>
-        <div class="pitch-circle"></div>
-        ${starters.slice(0, 11).map((p, idx) => {
-          const [x, y] = coords[idx] || [50, 50];
-          return `<div class="pitch-node" style="left:${x}%;top:${y}%;" onclick="selectedPlayerId='${p.id}';setSection('squad','profile')">
-            <span>${p.ovr}</span>
-            <span style="font-size:7px;color:var(--muted);">${p.name.split(' ').pop().substring(0, 5)}</span>
-          </div>`;
-        }).join("")}
-      </div>
-      <div class="grid-2">
-        <div>
-          <label>Formation</label>
-          <select onchange="getUserTeam().tactics.formation=this.value;saveState();renderApp();">
-            ${["4-3-3", "4-4-2", "3-5-2"].map(f => `<option value="${f}" ${tac.formation === f ? 'selected' : ''}>${f}</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label>Mentality</label>
-          <select onchange="getUserTeam().tactics.mentality=this.value;saveState();renderApp();">
-            ${["Defensive", "Balanced", "Attacking", "All-Out Attack"].map(m => `<option value="${m}" ${tac.mentality === m ? 'selected' : ''}>${m}</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label>Pressing</label>
-          <select onchange="getUserTeam().tactics.pressing=this.value;saveState();renderApp();">
-            ${["Low Block", "Mid Block", "High", "Gegenpress"].map(m => `<option value="${m}" ${tac.pressing === m ? 'selected' : ''}>${m}</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label>Tempo & Width</label>
-          <select onchange="getUserTeam().tactics.tempo=this.value;saveState();renderApp();">
-            ${["Slow & Narrow", "Standard", "Fast", "Fast & Wide"].map(m => `<option value="${m}" ${tac.tempo === m ? 'selected' : ''}>${m}</option>`).join("")}
-          </select>
-        </div>
-      </div>
-      <button class="btn btn-sec btn-block" onclick="saveTacticPreset()">💾 Save Current Tactic Preset</button>
+    <div class="row-between" style="margin-bottom:10px;">
+      <input style="margin:0;flex:1;" placeholder="🔍 Search squad..." value="${searchQuery}" oninput="searchQuery=this.value;render();" />
+      <div class="filter-pill" style="padding:8px 12px;">SQUAD SIZE: ${squad.length}/25</div>
     </div>
-  `;
-}
 
-function saveTacticPreset() {
-  const t = getUserTeam().tactics;
-  t.savedPresets.push({ name: `${t.formation} ${t.mentality}`, formation: t.formation, mentality: t.mentality });
-  saveState();
-  alert("Tactic preset saved!");
-}
-
-function renderTraining(team) {
-  return `
-    <div class="card">
-      <div class="card-title">Team Training Schedule</div>
-      <label>Weekly Focus</label>
-      <select onchange="getUserTeam().training.focus=this.value;saveState();renderApp();">
-        ${["Balanced", "Attacking & Shooting", "Defending & Tactical", "Speed & Fitness", "Youth Development"].map(f => `<option value="${f}" ${team.training.focus === f ? 'selected' : ''}>${f}</option>`).join("")}
-      </select>
-      <label>Training Intensity</label>
-      <select onchange="getUserTeam().training.intensity=this.value;saveState();renderApp();">
-        ${["Light (Recover Fitness)", "Medium", "Heavy (Faster Attribute Growth)"].map(i => `<option value="${i}" ${team.training.intensity === i ? 'selected' : ''}>${i}</option>`).join("")}
-      </select>
-    </div>
-  `;
-}
-
-/* 4. MATCHES: FIXTURES, PRE-MATCH, LIVE MATCH ENGINE, POST-MATCH */
-function renderFixtures(team) {
-  const myFix = state.fixtures.filter(f => f.homeId === team.id || f.awayId === team.id);
-  return `
-    <div class="card">
-      <div class="card-title">Club Fixtures & Results</div>
+    <div class="fm-card">
+      <div class="fm-card-header">PLAYER ROSTER</div>
       <table>
-        <thead><tr><th>Wk</th><th>Home</th><th>Score</th><th>Away</th></tr></thead>
+        <thead>
+          <tr><th>POS</th><th>NAME</th><th>AGE</th><th>OVR</th><th>FORM</th><th>FIT</th><th>CONTRACT</th></tr>
+        </thead>
         <tbody>
-          ${myFix.map(f => {
-            const h = getTeamById(f.homeId);
-            const a = getTeamById(f.awayId);
-            return `<tr>
-              <td>${f.week}</td>
-              <td><strong>${h.shortName}</strong></td>
-              <td><span class="badge">${f.played ? `${f.homeGoals} - ${f.awayGoals}` : 'v'}</span></td>
-              <td><strong>${a.shortName}</strong></td>
+          ${squad.map(p => {
+            const formNum = parseFloat(p.form || "7.10");
+            const formBg = formNum >= 7.1 ? "#22c55e" : "#eab308";
+            return `<tr onclick="openContractForPlayer('${p.id}')" style="cursor:pointer;">
+              <td><span class="pos-tag pos-${p.pos}">${p.pos}</span></td>
+              <td style="font-weight:700;">👤 ${p.name}</td>
+              <td>${p.age}</td>
+              <td style="font-weight:800;">${p.ovr}</td>
+              <td><span class="rating-pill" style="background:${formBg};">${p.form}</span></td>
+              <td>
+                <div class="fit-bar-bg">
+                  <div class="fit-bar-fill" style="width:${p.fit}%;background:${p.fit > 82 ? '#22c55e' : '#eab308'};"></div>
+                </div>
+              </td>
+              <td style="font-weight:700;">${p.contract}</td>
             </tr>`;
           }).join("")}
         </tbody>
       </table>
     </div>
+
+    <div class="cta-btn" onclick="currentSub='management';render();">
+      <span>MANAGE TEAM ⟫</span>
+    </div>
   `;
 }
 
-function renderPreMatch(team) {
-  const fix = state.fixtures.find(f => !f.played && (f.homeId === team.id || f.awayId === team.id));
-  if (!fix) return `<div class="card">No upcoming league match this week.</div>`;
-  const opp = getTeamById(fix.homeId === team.id ? fix.awayId : fix.homeId);
+function renderTacticsScreen() {
+  const club = getUserClub();
   return `
-    <div class="card">
-      <div class="card-title">Pre-Match Briefing • Week ${fix.week}</div>
-      <div class="row-between" style="margin:12px 0;">
-        <div style="text-align:center;flex:1;">${render2DCrestSVG(team, 48)}<div style="font-weight:700;">${team.name}</div></div>
-        <div style="font-size:18px;font-weight:900;">VS</div>
-        <div style="text-align:center;flex:1;">${render2DCrestSVG(opp, 48)}<div style="font-weight:700;">${opp.name}</div></div>
-      </div>
-      <label>Dressing Room Team Talk</label>
-      <select id="pm-talk">
-        <option value="passionate">Passionate: "Do it for the fans today!" (+Morale)</option>
-        <option value="calm">Calm: "Play your natural passing game."</option>
-        <option value="demanding">Demanding: "I expect nothing less than a win!"</option>
+    <div class="fm-card">
+      <div class="fm-card-header">Tactical Instructions & Formation</div>
+      <label style="font-size:12px;color:var(--text-muted);">Formation</label>
+      <select onchange="getUserClub().formation=this.value;saveGame();render();">
+        ${["4-3-3", "4-2-3-1", "4-4-2", "3-5-2", "3-4-3"].map(f => `<option value="${f}" ${club.formation === f ? 'selected' : ''}>${f}</option>`).join("")}
       </select>
-      <button class="btn btn-block" onclick="startLiveMatch('${fix.id}')">📢 Kick Off Live Match</button>
+      <label style="font-size:12px;color:var(--text-muted);">Team Mentality</label>
+      <select onchange="getUserClub().mentality=this.value;saveGame();render();">
+        ${["Ultra Defensive", "Counter-Attack", "Balanced", "Attacking", "Gegenpress High Tempo"].map(m => `<option value="${m}" ${club.mentality === m ? 'selected' : ''}>${m}</option>`).join("")}
+      </select>
+      <div class="cta-btn" onclick="currentSub='management';render();"><span>VIEW PITCH LINEUP ⟫</span></div>
     </div>
   `;
 }
 
-function startLiveMatch(fixId) {
-  const fix = state.fixtures.find(f => f.id === fixId);
-  if (!fix) return;
-  const home = getTeamById(fix.homeId);
-  const away = getTeamById(fix.awayId);
-  liveMatchState = {
-    fixId: fix.id,
-    minute: 0,
-    speed: 350,
-    home,
-    away,
-    homeGoals: 0,
-    awayGoals: 0,
-    homeShots: 0,
-    awayShots: 0,
-    homePoss: 50,
-    ballX: 50,
-    ballY: 50,
-    shout: "Balanced",
-    commentary: ["1' The referee blows the whistle and we are underway!"],
-    finished: false
-  };
-  setSection("matches", "live_match");
-  runLiveMatchLoop();
-}
-
-function runLiveMatchLoop() {
-  if (liveMatchTimer) clearInterval(liveMatchTimer);
-  if (!liveMatchState || liveMatchState.finished) return;
-  liveMatchTimer = setInterval(() => {
-    if (!liveMatchState || liveMatchState.finished) {
-      clearInterval(liveMatchTimer);
-      return;
-    }
-    liveMatchState.minute += 2;
-    liveMatchState.ballX = rInt(15, 85);
-    liveMatchState.ballY = rInt(15, 85);
-
-    const hStr = liveMatchState.home.reputation + 3 + (liveMatchState.shout === "Attack" ? 4 : 0);
-    const aStr = liveMatchState.away.reputation;
-    const roll = Math.random() * 100;
-
-    if (roll < 16) {
-      const isHomeAtk = Math.random() * (hStr + aStr) < hStr;
-      const atkTeam = isHomeAtk ? liveMatchState.home : liveMatchState.away;
-      const scorers = getTeamPlayers(atkTeam.id).filter(p => p.pos !== "GK");
-      const player = pick(scorers) || { name: "Striker", stats: { goals: 0 } };
-      if (isHomeAtk) liveMatchState.homeShots++; else liveMatchState.awayShots++;
-
-      if (Math.random() < 0.32) {
-        if (isHomeAtk) liveMatchState.homeGoals++; else liveMatchState.awayGoals++;
-        player.stats.goals++;
-        liveMatchState.ballX = 50;
-        liveMatchState.ballY = isHomeAtk ? 8 : 92;
-        liveMatchState.commentary.unshift(`⚽ ${liveMatchState.minute}' GOAL! ${player.name} scores a clinical finish for ${atkTeam.shortName}!`);
-      } else {
-        liveMatchState.commentary.unshift(`🧤 ${liveMatchState.minute}' Close! ${player.name} (${atkTeam.shortName}) forces a sharp save!`);
-      }
-    }
-
-    if (liveMatchState.minute >= 90) {
-      liveMatchState.finished = true;
-      clearInterval(liveMatchTimer);
-      liveMatchState.commentary.unshift(`🏁 90' FULL TIME: ${liveMatchState.home.name} ${liveMatchState.homeGoals} - ${liveMatchState.awayGoals} ${liveMatchState.away.name}`);
-      finalizeLiveMatch();
-    }
-    if (currentSubTab === "live_match") renderApp();
-  }, liveMatchState.speed);
-}
-
-function finalizeLiveMatch() {
-  const fix = state.fixtures.find(f => f.id === liveMatchState.fixId);
-  if (fix && !fix.played) {
-    fix.played = true;
-    fix.homeGoals = liveMatchState.homeGoals;
-    fix.awayGoals = liveMatchState.awayGoals;
-    applyMatchStatsToTable(fix);
-    // Simulate remaining matches of this week
-    state.fixtures.filter(f => f.week === state.week && !f.played).forEach(other => {
-      other.played = true;
-      other.homeGoals = rInt(0, 3);
-      other.awayGoals = rInt(0, 3);
-      applyMatchStatsToTable(other);
-    });
-    state.week++;
-    saveState();
-  }
-}
-
-function renderLiveMatch() {
-  if (!liveMatchState) {
-    return `<div class="card">No active live match. Start one from Pre-Match or Advance Week.</div>`;
-  }
+function renderStaffTrainingScreen() {
+  const club = getUserClub();
   return `
-    <div class="card">
-      <div class="row-between">
-        <div>${render2DCrestSVG(liveMatchState.home, 28)} <strong>${liveMatchState.home.shortName}</strong></div>
-        <div style="font-size:22px;font-weight:900;color:var(--accent);">${liveMatchState.homeGoals} - ${liveMatchState.awayGoals} <span class="badge">${liveMatchState.minute}'</span></div>
-        <div><strong>${liveMatchState.away.shortName}</strong> ${render2DCrestSVG(liveMatchState.away, 28)}</div>
-      </div>
-      <div class="pitch" style="height:190px;margin-top:8px;">
-        <div class="pitch-line-mid"></div>
-        <div class="pitch-circle"></div>
-        <div class="pitch-ball" style="left:${liveMatchState.ballX}%;top:${liveMatchState.ballY}%;"></div>
-      </div>
-      <div class="grid-3" style="margin-bottom:8px;">
-        <button class="btn btn-sec" onclick="liveMatchState.shout='Attack'">📢 Demand Attack</button>
-        <button class="btn btn-sec" onclick="liveMatchState.speed=120;runLiveMatchLoop();">⏩ 2x Speed</button>
-        <button class="btn btn-blue" onclick="setSection('matches','post_match')">📋 Match Report</button>
-      </div>
-      <div style="max-height:150px;overflow-y:auto;font-size:12px;line-height:1.5;background:var(--card-alt);padding:8px;border-radius:8px;">
-        ${liveMatchState.commentary.map(c => `<div style="margin-bottom:4px;">${c}</div>`).join("")}
-      </div>
+    <div class="fm-card">
+      <div class="fm-card-header">Coaching Staff & Squad Training</div>
+      <div class="fm-subbox">📢 <strong>Head Coach Focus:</strong> High-Intensity Tactical Pressing (+1 OVR progression)</div>
+      <div class="fm-subbox">🧤 <strong>Goalkeeping Coach:</strong> Shot-Stopping & Distribution</div>
+      <div class="fm-subbox">🏋️ <strong>Fitness Conditioning:</strong> Match Sharpness & Stamina Recovery</div>
+      <div class="cta-btn" onclick="boostSquadTraining()"><span>RUN INTENSIVE TRAINING SESSION ⟫</span></div>
     </div>
   `;
 }
 
-function renderPostMatch() {
-  if (!liveMatchState) return `<div class="card">Play a match first to view Post-Match Report & Press Conference.</div>`;
+function boostSquadTraining() {
+  const club = getUserClub();
+  getClubPlayers(club.id).forEach(p => {
+    p.fit = 100;
+    if (Math.random() < 0.25 && p.ovr < 96) p.ovr++;
+  });
+  saveGame();
+  alert("Training session completed! Squad fitness restored and young players progressed.");
+  render();
+}
+
+/* ============================================================================
+   SCREEN 5: MATCHES & FIXTURES (MATCHING UPLOADED IMAGE 1000158369_30f07c.jpg)
+   ============================================================================ */
+function renderMatchesFixturesScreen() {
+  const club = getUserClub();
+  const myFixtures = state.fixtures.filter(f => f.homeId === club.id || f.awayId === club.id);
+  const upcoming = myFixtures.find(f => !f.played) || myFixtures[0];
+  const opp = upcoming ? getClub(upcoming.homeId === club.id ? upcoming.awayId : upcoming.homeId) : getClub(state.clubs[1].id);
+  const windowFix = myFixtures.slice(Math.max(0, state.week - 3), state.week + 2);
+
   return `
-    <div class="card">
-      <div class="card-title">Post-Match Report & Press Conference</div>
-      <div style="font-size:18px;font-weight:800;text-align:center;margin:8px 0;">
-        ${liveMatchState.home.name} ${liveMatchState.homeGoals} - ${liveMatchState.awayGoals} ${liveMatchState.away.name}
+    <!-- UPCOMING MATCH BANNER -->
+    <div class="fm-card" style="text-align:center;">
+      <div style="font-size:12px;color:var(--text-muted);letter-spacing:0.8px;margin-bottom:6px;">UPCOMING MATCH</div>
+      <div class="row-between" style="justify-content:space-around;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${render2DCrest(club, 38)}
+          <div style="text-align:left;font-weight:800;font-size:13px;">${club.name.toUpperCase()}</div>
+        </div>
+        <div style="font-size:18px;font-weight:900;font-style:italic;color:var(--text-muted);">VS</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="text-align:right;font-weight:800;font-size:13px;">${opp.name.toUpperCase()}</div>
+          ${render2DCrest(opp, 38)}
+        </div>
       </div>
-      <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:12px;">
-        Shots: ${liveMatchState.homeShots} - ${liveMatchState.awayShots} • Possession: ${liveMatchState.homePoss}% - ${100 - liveMatchState.homePoss}%
-      </div>
-      <div class="card-title">Press Conference Question</div>
-      <div style="font-size:12px;margin-bottom:8px;">"How do you assess your squad's tactical execution out there today?"</div>
-      <button class="btn btn-block" onclick="state.manager.boardConfidence=Math.min(100,state.manager.boardConfidence+2);saveState();setSection('dashboard','overview');">"Proud of the players' discipline and work rate." (+Confidence)</button>
-      <button class="btn btn-sec btn-block" onclick="setSection('dashboard','overview');">"We still have plenty to improve on the training pitch."</button>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Premier Division • Saturday, 15:00</div>
+    </div>
+
+    <!-- RECENT RESULTS & FIXTURES -->
+    <div class="fm-card">
+      <div class="fm-card-header">RECENT RESULTS & FIXTURES</div>
+      ${windowFix.map((f, idx) => {
+        const h = getClub(f.homeId);
+        const a = getClub(f.awayId);
+        const parts = (f.dateStr || "26 OCT").split(" ");
+        const compLabel = idx === 1 ? "🏆 Champions Cup" : "🦁 Premier Division";
+        return `<div class="fm-subbox" style="display:flex;align-items:center;gap:10px;border-color:rgba(45,212,191,0.45);">
+          <div style="text-align:center;min-width:42px;border-right:1px solid #334155;padding-right:8px;">
+            <div style="font-size:18px;font-weight:900;line-height:1;">${parts[0]}</div>
+            <div style="font-size:10px;color:var(--text-muted);">${parts[1]}</div>
+          </div>
+          <div style="flex:1;">
+            <div class="row-between" style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">
+              <span>${compLabel}</span>
+              ${!f.played && idx === 2 ? `<span style="background:#10b981;color:#04131a;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:800;">UPCOMING</span>` : `<span style="font-size:10px;">16:00</span>`}
+            </div>
+            <div class="row-between" style="font-size:13px;font-weight:700;">
+              <span>${render2DCrest(h, 20)} ${h.name}</span>
+              <span style="font-size:15px;font-weight:900;color:${f.played ? '#f8fafc' : 'var(--neon-cyan)'};">
+                ${f.played ? `${f.hg} - ${f.ag}` : 'vs'}
+              </span>
+              <span>${a.name} ${render2DCrest(a, 20)}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>
+
+    <div class="cta-btn" onclick="launchLiveMatch()">
+      <span>SIMULATE / PLAY MATCH ⟫</span>
     </div>
   `;
 }
 
-/* 5. COMPETITIONS: LEAGUE TABLE, CUPS, STATS & AWARDS */
-function applyMatchStatsToTable(fix) {
-  const h = getTeamById(fix.homeId);
-  const a = getTeamById(fix.awayId);
-  if (!h.stats || !a.stats) return;
-  h.stats.p++; a.stats.p++;
-  h.stats.gf += fix.homeGoals; h.stats.ga += fix.awayGoals;
-  a.stats.gf += fix.awayGoals; a.stats.ga += fix.homeGoals;
-  if (fix.homeGoals > fix.awayGoals) {
-    h.stats.w++; h.stats.pts += 3; h.stats.form.push("W");
-    a.stats.l++; a.stats.form.push("L");
-  } else if (fix.homeGoals < fix.awayGoals) {
-    a.stats.w++; a.stats.pts += 3; a.stats.form.push("W");
-    h.stats.l++; h.stats.form.push("L");
-  } else {
-    h.stats.d++; a.stats.d++; h.stats.pts++; a.stats.pts++;
-    h.stats.form.push("D"); a.stats.form.push("D");
-  }
-}
-
-let selectedLeagueTab = "lg_1";
-function renderLeagueTable() {
-  const teams = state.teams.filter(t => t.leagueId === selectedLeagueTab).sort((a, b) => (b.stats.pts - a.stats.pts) || ((b.stats.gf - b.stats.ga) - (a.stats.gf - a.stats.ga)));
+function renderResultsScreen() {
+  const lgFix = state.fixtures.filter(f => f.compId === viewedCompetitionId && f.played).slice(-15).reverse();
   return `
-    <div class="card">
-      <div class="row-between" style="margin-bottom:8px;">
-        <div class="card-title" style="margin:0;">League Standings</div>
-        <select style="width:auto;margin:0;" onchange="selectedLeagueTab=this.value;renderApp();">
-          ${state.leagues.map(l => `<option value="${l.id}" ${l.id === selectedLeagueTab ? 'selected' : ''}>${l.name}</option>`).join("")}
-        </select>
-      </div>
-      <table>
-        <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>PTS</th></tr></thead>
-        <tbody>
-          ${teams.map((t, i) => `
-            <tr style="${t.id === state.manager.clubId ? 'background:#064e3b55;' : ''}">
-              <td>${i + 1}</td>
-              <td>${render2DCrestSVG(t, 18)} <strong>${t.name}</strong></td>
-              <td>${t.stats.p}</td><td>${t.stats.w}</td><td>${t.stats.d}</td><td>${t.stats.l}</td>
-              <td>${t.stats.gf - t.stats.ga}</td>
-              <td><strong>${t.stats.pts}</strong></td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-function renderCups() {
-  return `
-    <div class="card">
-      <div class="card-title">National Knockout Cup Bracket</div>
-      <button class="btn btn-block" style="margin-bottom:10px;" onclick="simCupRound()">⚡ Simulate Cup Round</button>
-      ${state.cupMatches.map(m => {
-        const h = getTeamById(m.homeId);
-        const a = getTeamById(m.awayId);
-        return `<div class="row-between" style="padding:7px 0;border-bottom:1px solid #1e293b;">
-          <span>${m.round}</span>
-          <strong>${h.shortName} ${m.played ? `${m.homeGoals} - ${m.awayGoals}` : 'vs'} ${a.shortName}</strong>
-          <span class="badge">${m.winnerId ? getTeamById(m.winnerId).shortName : 'Pending'}</span>
+    <div class="fm-card">
+      <div class="fm-card-header">Completed Match Results</div>
+      <select onchange="viewedCompetitionId=this.value;render();">
+        ${state.leagues.map(l => `<option value="${l.id}" ${l.id === viewedCompetitionId ? 'selected' : ''}>${l.flag} ${l.name}</option>`).join("")}
+      </select>
+      ${lgFix.map(f => {
+        const h = getClub(f.homeId);
+        const a = getClub(f.awayId);
+        return `<div class="fm-subbox row-between">
+          <span>Wk ${f.week}: <strong>${h.name}</strong></span>
+          <span class="pos-tag pos-MID">${f.hg} - ${f.ag}</span>
+          <span><strong>${a.name}</strong></span>
         </div>`;
       }).join("")}
     </div>
   `;
 }
 
-function simCupRound() {
-  state.cupMatches.forEach(m => {
-    if (!m.played) {
-      m.played = true;
-      m.homeGoals = rInt(0, 4);
-      m.awayGoals = rInt(0, 4);
-      if (m.homeGoals === m.awayGoals) m.homeGoals++;
-      m.winnerId = m.homeGoals > m.awayGoals ? m.homeId : m.awayId;
-    }
-  });
-  saveState();
-  renderApp();
-}
+/* ============================================================================
+   SCREEN 6: LEAGUE TABLE & OTHER COMPETITIONS EXPLORER (1000158370_30f07c.jpg)
+   ============================================================================ */
+function renderLeagueTableScreen() {
+  const lg = state.leagues.find(l => l.id === viewedCompetitionId) || state.leagues[0];
+  const standings = state.clubs.filter(c => c.leagueId === lg.id)
+    .sort((a, b) => (b.stats.pts - a.stats.pts) || ((b.stats.gf - b.stats.ga) - (a.stats.gf - a.stats.ga)));
 
-function renderStatsAwards() {
-  const topScorers = [...state.players].sort((a, b) => b.stats.goals - a.stats.goals).slice(0, 10);
   return `
-    <div class="card">
-      <div class="card-title">Golden Boot & League Leaders</div>
-      <table>
-        <thead><tr><th>Player</th><th>Club</th><th>OVR</th><th>Goals</th></tr></thead>
-        <tbody>
-          ${topScorers.map(p => `
-            <tr>
-              <td><strong>${p.name}</strong></td>
-              <td>${getTeamById(p.teamId).shortName}</td>
-              <td>${p.ovr}</td>
-              <td><span class="badge">${p.stats.goals}</span></td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
+    <!-- COMPETITION SWITCHER: ALLOWS SEEING ANY LEAGUE IN THE WORLD -->
+    <div class="row-between" style="margin-bottom:8px;">
+      <select style="margin:0;font-weight:800;border-color:var(--neon-cyan);" onchange="viewedCompetitionId=this.value;render();">
+        ${state.leagues.map(l => `<option value="${l.id}" ${l.id === lg.id ? 'selected' : ''}>${l.flag} ${l.name} (${state.clubs.filter(c => c.leagueId === l.id).length} Clubs)</option>`).join("")}
+      </select>
+      <button class="sm-btn" onclick="currentSub='other_comps';render();">All Cups</button>
     </div>
-  `;
-}
 
-/* 6. TRANSFERS, SCOUTING, NEGOTIATIONS, CONTRACTS, FINANCES */
-let marketSearch = "";
-function renderTransferMarket(team) {
-  const pool = state.players.filter(p => p.teamId !== team.id && p.name.toLowerCase().includes(marketSearch.toLowerCase())).sort((a, b) => b.ovr - a.ovr).slice(0, 25);
-  return `
-    <div class="card">
-      <div class="card-title">Transfer Market & Free Agents (Budget: ${formatMoney(team.budget)})</div>
-      <input placeholder="Search player name..." value="${marketSearch}" oninput="marketSearch=this.value;renderApp();" />
+    <div class="fm-card" style="padding:8px;">
       <table>
-        <thead><tr><th>Pos</th><th>Name</th><th>OVR</th><th>Value</th><th>Action</th></tr></thead>
+        <thead>
+          <tr><th>POS</th><th>CLUB</th><th>P</th><th>GD</th><th>PTS</th><th>FORM</th></tr>
+        </thead>
         <tbody>
-          ${pool.map(p => `
-            <tr>
-              <td><span class="pos-${p.pos}">${p.pos}</span></td>
-              <td><strong>${p.name}</strong><div style="font-size:10px;color:var(--muted);">${getTeamById(p.teamId).name}</div></td>
-              <td><span class="badge">${p.ovr}</span></td>
-              <td>${formatMoney(p.value)}</td>
+          ${standings.map((c, idx) => {
+            const posNum = idx + 1;
+            const posStr = posNum === 1 ? "1st" : posNum === 2 ? "2nd" : posNum === 3 ? "3rd" : `${posNum}th`;
+            const gd = c.stats.gf - c.stats.ga;
+            const gdStr = gd > 0 ? `+${gd}` : `${gd}`;
+            const isUser = c.id === state.userClubId;
+            const last5 = c.stats.form.slice(-5);
+            return `<tr style="${isUser ? 'outline:2px solid #2dd4bf;background:rgba(45,212,191,0.14);' : ''}" onclick="inspectAnyClub('${c.id}')">
+              <td style="font-weight:800;font-size:13px;">${posStr}</td>
               <td>
-                <button class="btn" style="padding:4px 8px;" onclick="buyPlayer('${p.id}')">Buy</button>
-                <button class="btn btn-sec" style="padding:4px 6px;" onclick="shortlistPlayer('${p.id}')">★</button>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  ${render2DCrest(c, 24)}
+                  <span style="font-weight:700;font-size:12px;">${c.name}</span>
+                </div>
               </td>
+              <td>${c.stats.p}</td>
+              <td>${gdStr}</td>
+              <td style="font-weight:900;font-size:14px;">${c.stats.pts}</td>
+              <td>
+                ${last5.map(r => `<span class="form-dot form-${r}">${r}</span>`).join("")}
+              </td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cta-row">
+      <div class="cta-btn" onclick="advanceWorldWeek()"><span>CONTINUE ⟫</span></div>
+      <div class="cta-btn" onclick="navigate('squad','management')"><span>VIEW SQUAD ⟫</span></div>
+    </div>
+  `;
+}
+
+function inspectAnyClub(clubId) {
+  const c = getClub(clubId);
+  const topPlayers = getClubPlayers(clubId).sort((a, b) => b.ovr - a.ovr).slice(0, 5);
+  alert(`${c.name} (${c.nickname})\nStadium: ${c.stadium} (${c.capacity.toLocaleString()})\nBudget: ${fmtMoney(c.budget)}\nTop Stars: ${topPlayers.map(p => `${p.name} (${p.ovr})`).join(", ")}`);
+}
+
+/* ABILITY TO SEE ALL OTHER COMPETITIONS (LEAGUES + CONTINENTAL CUPS) */
+function renderAllCompetitionsExplorer() {
+  const euroClubs = state.clubs.filter(c => ["eng_1", "esp_1", "ita_1", "ger_1", "fra_1"].includes(c.leagueId)).sort((a, b) => b.rep - a.rep).slice(0, 8);
+  const cafClubs = state.clubs.filter(c => c.leagueId === "alg_1").slice(0, 4);
+  const libClubs = state.clubs.filter(c => c.leagueId === "bra_1").slice(0, 4);
+
+  return `
+    <div class="fm-card">
+      <div class="fm-card-header">🌍 World Leagues Directory (Tap to View Table)</div>
+      <div class="grid-2">
+        ${state.leagues.map(l => `
+          <div class="fm-subbox" style="cursor:pointer;margin:0;" onclick="viewedCompetitionId='${l.id}';currentSub='table';render();">
+            <div style="font-size:15px;font-weight:800;">${l.flag} ${l.country}</div>
+            <div style="font-size:11px;color:var(--neon-cyan);">${l.name}</div>
+            <div style="font-size:10px;color:var(--text-muted);">${state.clubs.filter(c => c.leagueId === l.id).length} Real-Size Clubs</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+
+    <div class="fm-card">
+      <div class="fm-card-header">🏆 UEFA Champions Cup Quarter-Finals</div>
+      ${[0, 2, 4, 6].map(i => `
+        <div class="fm-subbox row-between">
+          <span>${render2DCrest(euroClubs[i], 20)} <strong>${euroClubs[i].name}</strong></span>
+          <span class="pos-tag pos-MID">${rInt(1, 3)} - ${rInt(0, 2)}</span>
+          <span><strong>${euroClubs[i + 1].name}</strong> ${render2DCrest(euroClubs[i + 1], 20)}</span>
+        </div>
+      `).join("")}
+    </div>
+
+    <div class="fm-card">
+      <div class="fm-card-header">🌍 CAF Champions Cup & Copa Libertadores</div>
+      <div class="fm-subbox row-between">
+        <span>🇩🇿 <strong>${cafClubs[0].name}</strong> vs <strong>${cafClubs[1].name}</strong></span>
+        <span class="pos-tag pos-GK">CAF Semi-Final</span>
+      </div>
+      <div class="fm-subbox row-between">
+        <span>🇧🇷 <strong>${libClubs[0].name}</strong> vs <strong>${libClubs[2].name}</strong></span>
+        <span class="pos-tag pos-FWD">Libertadores Final</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================================
+   SCREEN 7: TRANSFER MARKET (MATCHING UPLOADED IMAGE 1000158373_30f07c.jpg)
+   ============================================================================ */
+function renderTransferMarketScreen() {
+  const club = getUserClub();
+  let list = state.players.filter(p => p.clubId !== club.id && p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  if (marketFilterPos !== "ALL") list = list.filter(p => p.pos === marketFilterPos);
+  list.sort((a, b) => b.ovr - a.ovr);
+
+  return `
+    <div class="row-between" style="margin-bottom:8px;">
+      <input style="margin:0;flex:1;" placeholder="🔍 Search world players..." value="${searchQuery}" oninput="searchQuery=this.value;render();" />
+      <div class="filter-pill">BUDGET: ${fmtMoney(club.budget)}</div>
+    </div>
+
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:700;">FILTER PILLS</div>
+    <div class="pill-row">
+      ${["ALL", "ST", "AMR", "AML", "MC", "DC", "DR", "DL", "GK"].map(pos => `
+        <div class="filter-pill ${marketFilterPos === pos ? 'active' : ''}" onclick="marketFilterPos='${pos}';render();">${pos === 'ALL' ? 'POS ▾' : pos}</div>
+      `).join("")}
+    </div>
+
+    <div class="fm-card" style="padding:8px;">
+      <div class="fm-card-header">PLAYER ROSTER (TAP PLAYER TO NEGOTIATE)</div>
+      <table>
+        <thead>
+          <tr><th>POS</th><th>NAME</th><th>AGE</th><th>OVR</th><th>VALUE</th><th>WAGE</th><th>STATUS</th></tr>
+        </thead>
+        <tbody>
+          ${list.slice(0, 22).map(p => `
+            <tr onclick="openNegotiationForPlayer('${p.id}')" style="cursor:pointer;">
+              <td><span class="pos-tag pos-${p.pos}">${p.pos}</span></td>
+              <td style="font-weight:700;">👤 ${p.name}</td>
+              <td>${p.age}</td>
+              <td style="font-weight:900;">${p.ovr}</td>
+              <td>${fmtMoney(p.value)}</td>
+              <td>${fmtMoney(p.wage)}</td>
+              <td style="font-size:11px;color:${p.status === 'Unhappy' ? '#f87171' : '#cbd5e1'};">${p.status || 'Listed'}</td>
             </tr>
           `).join("")}
         </tbody>
       </table>
     </div>
+
+    <div class="cta-btn" onclick="openNegotiationForPlayer('${list[0] ? list[0].id : ''}')">
+      <span>ADVANCE TRANSFER ⟫</span>
+    </div>
   `;
 }
 
-function buyPlayer(id) {
-  const team = getUserTeam();
-  const p = state.players.find(x => x.id === id);
+function openNegotiationForPlayer(pid) {
+  if (!pid) return;
+  activeNegotiationPlayerId = pid;
+  navigate("inbox", "negotiations");
+}
+
+/* ============================================================================
+   SCREEN 8: NEGOTIATIONS (MATCHING UPLOADED IMAGE 1000158375_30f07c.jpg)
+   ============================================================================ */
+let offerBidAmount = 68000000;
+let offerSellOn = 15;
+
+function renderNegotiationsScreen() {
+  const p = state.players.find(x => x.id === activeNegotiationPlayerId) || state.players.find(x => x.name.includes("Fernandes")) || state.players[0];
+  if (!offerBidAmount || Math.abs(offerBidAmount - p.value) > 40000000) offerBidAmount = p.value;
+
+  return `
+    <!-- Player Header with Gold OVR Shield -->
+    <div class="fm-card">
+      <div class="row-between">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:58px;height:58px;border-radius:50%;background:#1e293b;border:2px solid var(--neon-cyan);display:flex;align-items:center;justify-content:center;font-size:28px;">👤</div>
+          <div>
+            <div style="font-size:20px;font-weight:900;">${p.name.toUpperCase()}</div>
+            <div style="font-size:13px;color:var(--text-muted);">${p.pos} / MC</div>
+            <div style="font-size:13px;margin-top:2px;">${p.nat}</div>
+          </div>
+        </div>
+        <div style="background:linear-gradient(180deg,#eab308,#a16207);padding:8px 12px;border-radius:10px;border:2px solid #fef08a;text-align:center;">
+          <div style="font-size:10px;font-weight:800;color:#fff;">OVR</div>
+          <div style="font-size:22px;font-weight:900;color:#fff;line-height:1;">${p.ovr}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:13px;font-weight:800;color:var(--text-muted);margin-bottom:8px;">TALKS WITH AGENT</div>
+
+    <!-- AGENT FEEDBACK -->
+    <div class="fm-card">
+      <div class="fm-card-header">AGENT FEEDBACK</div>
+      <div class="fm-subbox" style="border-color:var(--neon-cyan);">
+        <div style="color:var(--neon-cyan);font-weight:800;font-size:12px;margin-bottom:4px;">AGENT: JORGE MENDES 💬</div>
+        <div style="font-size:12px;line-height:1.45;">My client is interested, but we expect a competitive transfer fee and solid contract terms to reach an agreement.</div>
+      </div>
+    </div>
+
+    <!-- TRANSFER FEE SLIDER -->
+    <div class="fm-card" style="text-align:center;">
+      <div class="fm-card-header">TRANSFER FEE</div>
+      <div style="display:inline-block;padding:6px 18px;border-radius:8px;border:1.5px solid #4ade80;background:#091526;font-size:22px;font-weight:900;color:#4ade80;margin-bottom:8px;">
+        ${fmtMoney(offerBidAmount)}
+      </div>
+      <input type="range" min="${Math.round(p.value * 0.7)}" max="${Math.round(p.value * 1.4)}" step="500000" value="${offerBidAmount}" oninput="offerBidAmount=Number(this.value);render();" />
+      <div style="font-size:11px;color:var(--text-muted);">Range: ${fmtMoney(p.value * 0.85)} - ${fmtMoney(p.value * 1.25)}</div>
+    </div>
+
+    <!-- SELL-ON CLAUSE -->
+    <div class="fm-card row-between">
+      <span style="font-weight:800;font-size:14px;">SELL-ON CLAUSE</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="sm-btn" onclick="offerSellOn=Math.max(0,offerSellOn-5);render();">−</button>
+        <span style="font-size:18px;font-weight:900;color:#4ade80;">${offerSellOn}%</span>
+        <button class="sm-btn" onclick="offerSellOn=Math.min(50,offerSellOn+5);render();">+</button>
+      </div>
+    </div>
+
+    <!-- CONTRACT DETAILS -->
+    <div class="fm-card">
+      <div class="fm-card-header">CONTRACT DETAILS</div>
+      <div class="row-between" style="font-size:13px;font-weight:800;">
+        <span>AGENT FEE: £3.5M</span>
+        <span>SIGN-ON FEE: £5.0M</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:10px;">
+      <button class="sm-btn danger" style="padding:12px;font-size:13px;" onclick="navigate('squad','market')">✕ WALK AWAY</button>
+      <button class="sm-btn" style="padding:12px;font-size:13px;background:#3b82f6;color:#fff;" onclick="offerBidAmount=p.value;render();">↻ COUNTER OFFER</button>
+    </div>
+
+    <div class="cta-btn" onclick="submitTransferOffer('${p.id}')">
+      <span>SUBMIT OFFER ▶</span>
+    </div>
+  `;
+}
+
+function submitTransferOffer(pid) {
+  const club = getUserClub();
+  const p = state.players.find(x => x.id === pid);
   if (!p) return;
-  const fee = p.teamId === "FREE" ? 0 : p.value;
-  if (team.budget < fee) {
-    alert("Insufficient transfer budget!");
+  if (club.budget < offerBidAmount) {
+    alert("Your club transfer budget is lower than the proposed offer!");
     return;
   }
-  team.budget -= fee;
-  p.teamId = team.id;
-  team.bench.push(p.id);
-  state.inbox.push({
-    id: uid("msg"),
+  club.budget -= offerBidAmount;
+  p.clubId = club.id;
+  p.status = "-";
+  state.inbox.unshift({
+    id: uid("m"),
     week: state.week,
-    category: "Transfer",
-    title: `Signed ${p.name}!`,
-    body: `${p.name} (OVR ${p.ovr}) has joined ${team.name} for ${formatMoney(fee)}.`,
-    read: false
+    type: "Scout",
+    title: `Transfer Completed: ${p.name} signs for ${club.name}!`,
+    body: `Deal agreed with Agent Jorge Mendes for ${fmtMoney(offerBidAmount)}.`,
+    unread: true
   });
-  saveState();
-  renderApp();
+  saveGame();
+  alert(`Deal agreed! ${p.name} has joined ${club.name}!`);
+  navigate("squad", "roster");
 }
 
-function shortlistPlayer(id) {
-  if (!state.shortlist.includes(id)) state.shortlist.push(id);
-  saveState();
-  alert("Added to Scouting Shortlist!");
+/* ============================================================================
+   SCREEN 9: CONTRACTS & RENEWALS (MATCHING UPLOADED IMAGE 1000158376_30f07c.jpg)
+   ============================================================================ */
+function openContractForPlayer(pid) {
+  activeContractPlayerId = pid;
+  navigate("inbox", "contracts");
 }
 
-function renderScouting() {
-  const list = state.shortlist.map(id => state.players.find(p => p.id === id)).filter(Boolean);
+function renderContractsScreen() {
+  const club = getUserClub();
+  const squad = getClubPlayers(club.id);
+  const p = squad.find(x => x.id === activeContractPlayerId) || squad[0];
+
   return `
-    <div class="card">
-      <div class="card-title">Scouting Network & Shortlist (${list.length})</div>
-      <button class="btn btn-block" style="margin-bottom:10px;" onclick="discoverWonderkid()">🔍 Send Chief Scout to Find Wonderkid (€250K)</button>
-      ${list.map(p => `
-        <div class="row-between" style="padding:6px 0;border-bottom:1px solid #1e293b;">
-          <div><strong>${p.name}</strong> (${p.pos} • OVR ${p.ovr} / POT ${p.pot})</div>
-          <button class="btn" onclick="buyPlayer('${p.id}')">Sign (${formatMoney(p.value)})</button>
+    <div class="fm-card">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+        <div style="width:58px;height:58px;border-radius:50%;background:#1e293b;border:2px solid var(--neon-cyan);display:flex;align-items:center;justify-content:center;font-size:28px;">👤</div>
+        <div>
+          <div style="font-size:20px;font-weight:900;">${p.name.toUpperCase()}</div>
+          <div style="font-size:13px;color:var(--text-muted);">${p.pos} / MC</div>
+          <div style="font-size:13px;">${p.nat}</div>
         </div>
-      `).join("")}
+      </div>
+
+      <div style="text-align:center;font-size:13px;font-weight:800;color:var(--text-muted);margin-bottom:8px;">PROPOSED TERMS</div>
+
+      <div class="fm-subbox">
+        <div style="font-size:11px;color:var(--text-muted);">💲 Weekly Wage</div>
+        <div style="font-size:18px;font-weight:900;color:#4ade80;">£${p.wage.toLocaleString()}</div>
+      </div>
+
+      <div class="fm-subbox row-between">
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);">📅 Contract Length</div>
+          <div style="font-size:15px;font-weight:900;color:#4ade80;">4 Years (until 2030)</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);">Contract Clause</div>
+          <div style="font-size:15px;font-weight:900;color:#4ade80;">N/A</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="fm-subbox" style="margin:0;">
+          <div style="font-size:11px;color:var(--text-muted);">🔓 Release Clause</div>
+          <div style="font-size:15px;font-weight:900;color:#4ade80;">£85,000,000</div>
+        </div>
+        <div class="fm-subbox" style="margin:0;">
+          <div style="font-size:11px;color:var(--text-muted);">💰 Signing Bonus</div>
+          <div style="font-size:15px;font-weight:900;color:#4ade80;">£1,500,000</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fm-card">
+      <div class="fm-card-header">EXPIRING CONTRACTS</div>
+      <table>
+        <thead><tr><th>NAME</th><th>EXPIRY</th><th>WAGE</th><th>STATUS</th></tr></thead>
+        <tbody>
+          ${squad.slice(0, 5).map(pl => `
+            <tr>
+              <td style="font-weight:700;">${pl.name}</td>
+              <td>June ${pl.contract}</td>
+              <td>${fmtMoney(pl.wage)}</td>
+              <td><button class="sm-btn" onclick="activeContractPlayerId='${pl.id}';render();">RENEW</button></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cta-btn" onclick="confirmContractRenewal('${p.id}')">
+      <span>CONFIRM RENEWAL ⟫</span>
     </div>
   `;
 }
 
-function discoverWonderkid() {
-  const team = getUserTeam();
-  if (team.budget < 250000) return;
-  team.budget -= 250000;
-  const wk = generatePlayer("FREE", pick(["MID", "FWD", "DEF"]), pick(["Brazil", "Algeria", "Spain", "France"]), 8);
-  wk.age = 17;
-  wk.pot = 94;
-  state.players.push(wk);
-  state.shortlist.push(wk.id);
-  saveState();
-  renderApp();
-}
-
-function renderNegotiations(team) {
-  const listed = getTeamPlayers(team.id).filter(p => p.transferListed);
-  return `
-    <div class="card">
-      <div class="card-title">Active Transfer Negotiations & Outgoing Bids</div>
-      ${listed.length === 0 ? `<div style="font-size:12px;color:var(--muted);">Transfer-list a player in your squad to receive AI club offers immediately.</div>` : ''}
-      ${listed.map(p => `
-        <div class="row-between" style="padding:8px 0;border-bottom:1px solid #1e293b;">
-          <div><strong>${p.name}</strong> (AI Offer: ${formatMoney(Math.round(p.value * 0.95))})</div>
-          <button class="btn" onclick="sellPlayer('${p.id}')">Accept Offer</button>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function sellPlayer(id) {
-  const team = getUserTeam();
-  const p = state.players.find(x => x.id === id);
-  if (!p) return;
-  const fee = Math.round(p.value * 0.95);
-  team.budget += fee;
-  p.teamId = "team_2";
-  p.transferListed = false;
-  team.lineup = team.lineup.filter(x => x !== id);
-  team.bench = team.bench.filter(x => x !== id);
-  saveState();
-  renderApp();
-}
-
-function renderContracts(team) {
-  const squad = getTeamPlayers(team.id);
-  return `
-    <div class="card">
-      <div class="card-title">Squad Contracts & Renewals</div>
-      ${squad.map(p => `
-        <div class="row-between" style="padding:6px 0;border-bottom:1px solid #1e293b;">
-          <div>
-            <strong>${p.name}</strong> (${p.contractYears} yrs left)
-            <div style="font-size:11px;color:var(--muted);">Wage: ${formatMoney(p.wage)}/wk</div>
-          </div>
-          <button class="btn btn-sec" onclick="renewContract('${p.id}')">+3 Yrs</button>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function renewContract(id) {
-  const p = state.players.find(x => x.id === id);
+function confirmContractRenewal(pid) {
+  const p = state.players.find(x => x.id === pid);
   if (p) {
-    p.contractYears += 3;
-    p.wage = Math.round(p.wage * 1.15);
-    p.morale = Math.min(99, p.morale + 8);
+    p.contract = 2030;
+    p.morale = 99;
+    saveGame();
+    alert(`${p.name} has signed a new 4-year contract until 2030!`);
+    render();
   }
-  saveState();
-  renderApp();
 }
 
-function renderFinances(team) {
-  const totalWages = getTeamPlayers(team.id).reduce((s, p) => s + p.wage, 0);
+/* ============================================================================
+   SCREEN 10: CLUB OVERVIEW (MATCHING UPLOADED IMAGE 1000158378_30f07c.jpg)
+   ============================================================================ */
+function renderClubOverviewScreen() {
+  const club = getUserClub();
+  const stars = "★★★★☆";
+
   return `
-    <div class="card">
-      <div class="card-title">Club Finances & 12-Month Projection</div>
-      <div class="grid-2" style="margin-bottom:10px;">
-        <div class="stat-box"><div class="stat-val">${formatMoney(team.budget)}</div><div class="stat-lbl">Transfer Balance</div></div>
-        <div class="stat-box"><div class="stat-val">${formatMoney(totalWages)}/wk</div><div class="stat-lbl">Weekly Payroll</div></div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Annual Kit & Main Sponsor Income: <strong style="color:var(--accent);">${formatMoney(team.sponsorIncome)}</strong></div>
-      <div class="card-title">12-Month Net Cashflow Chart</div>
-      <div style="display:flex;align-items:flex-end;gap:5px;height:100px;padding:10px;background:#090e1a;border-radius:8px;">
-        ${team.financesHistory.map((v, i) => {
-          const h = Math.min(85, Math.max(15, Math.round((v + 1000000) / 35000)));
-          return `<div style="flex:1;background:${v >= 0 ? 'var(--accent)' : 'var(--danger)'};height:${h}px;border-radius:4px;" title="M${i + 1}"></div>`;
-        }).join("")}
+    <!-- Club Header Card -->
+    <div class="fm-card">
+      <div style="display:flex;align-items:center;gap:12px;">
+        ${render2DCrest(club, 56)}
+        <div style="flex:1;">
+          <div style="font-size:18px;font-weight:900;">'${club.name.toUpperCase()}'</div>
+          <div class="grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:6px;font-size:11px;">
+            <div><div style="color:var(--text-muted);font-size:9px;">NICKNAME</div><strong>${club.nickname}</strong></div>
+            <div><div style="color:var(--text-muted);font-size:9px;">FOUNDED</div><strong>Est. ${club.founded}</strong></div>
+            <div><div style="color:var(--text-muted);font-size:9px;">REPUTATION</div><strong style="color:var(--neon-cyan);">${stars}</strong></div>
+          </div>
+        </div>
       </div>
     </div>
-  `;
-}
 
-/* SEASON LOOP: ADVANCE WEEK */
-function advanceWeek() {
-  const team = getUserTeam();
-  const myFix = state.fixtures.find(f => f.week === state.week && !f.played && (f.homeId === team.id || f.awayId === team.id));
-
-  // Sim all week matches
-  state.fixtures.filter(f => f.week === state.week && !f.played).forEach(f => {
-    f.played = true;
-    const h = getTeamById(f.homeId);
-    const a = getTeamById(f.awayId);
-    f.homeGoals = Math.max(0, Math.round((h.reputation - a.reputation) / 15) + rInt(0, 3));
-    f.awayGoals = Math.max(0, rInt(0, 3));
-    applyMatchStatsToTable(f);
-  });
-
-  // Training & injury recovery
-  state.players.forEach(p => {
-    if (p.injuredWeeks > 0) p.injuredWeeks--;
-    if (p.teamId === team.id && team.training.intensity.includes("Heavy") && Math.random() < 0.15) {
-      p.ovr = Math.min(99, p.ovr + 1);
-    }
-  });
-
-  if (myFix) {
-    const h = getTeamById(myFix.homeId);
-    const a = getTeamById(myFix.awayId);
-    state.inbox.push({
-      id: uid("msg"),
-      week: state.week,
-      category: "Match",
-      title: `Result: ${h.shortName} ${myFix.homeGoals} - ${myFix.awayGoals} ${a.shortName}`,
-      body: `Matchday ${state.week} completed.`,
-      read: false
-    });
-  }
-
-  state.week++;
-  // Check Season End (after week 22)
-  if (state.week > 22) {
-    runEndOfSeason();
-  }
-  saveState();
-  renderApp();
-}
-
-function runEndOfSeason() {
-  const lg1 = state.teams.filter(t => t.leagueId === "lg_1").sort((a, b) => b.stats.pts - a.stats.pts);
-  const lg2 = state.teams.filter(t => t.leagueId === "lg_2").sort((a, b) => b.stats.pts - a.stats.pts);
-  const champ = lg1[0];
-  if (champ.id === state.manager.clubId) {
-    state.manager.trophies.push(`Season ${state.season} Champion`);
-  }
-  state.manager.seasonHistory.push({
-    season: state.season,
-    champion: champ.name,
-    cupWinner: lg1[1].name
-  });
-
-  // Promotion & Relegation (bottom 2 of lg_1 swap with top 2 of lg_2)
-  if (lg1.length >= 2 && lg2.length >= 2) {
-    lg1[lg1.length - 1].leagueId = "lg_2";
-    lg1[lg1.length - 2].leagueId = "lg_2";
-    lg2[0].leagueId = "lg_1";
-    lg2[1].leagueId = "lg_1";
-  }
-
-  // Reset stats & generate new season
-  state.season++;
-  state.week = 1;
-  state.teams.forEach(t => {
-    t.stats = { p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, form: [] };
-    t.budget += t.sponsorIncome;
-  });
-  const lg1Ids = state.teams.filter(t => t.leagueId === "lg_1").map(t => t.id);
-  const lg2Ids = state.teams.filter(t => t.leagueId === "lg_2").map(t => t.id);
-  state.fixtures = [
-    ...generateRoundRobinFixtures(lg1Ids, "lg_1"),
-    ...generateRoundRobinFixtures(lg2Ids, "lg_2")
-  ];
-}
-
-/* =========================================================================
-   7. BUILT-IN EDITOR / DATABASE MODULE
-   ========================================================================= */
-function renderEditorHome() {
-  const report = validateDatabase();
-  return `
-    <div class="card">
-      <div class="card-title">Built-In Database Studio</div>
-      <label>Active Database Name</label>
-      <input value="${state.meta.dbName}" onchange="pushUndoSnapshot();state.meta.dbName=this.value;saveState();" />
-      <div class="grid-2" style="margin-bottom:8px;">
-        <button class="btn" onclick="createNewBlankDatabase()">➕ New Blank DB</button>
-        <button class="btn btn-blue" onclick="createBackupVersion()">📦 Save DB Backup</button>
-        <button class="btn btn-sec" onclick="undoEditor()">↩️ Undo (${undoStack.length})</button>
-        <button class="btn btn-sec" onclick="redoEditor()">↪️ Redo (${redoStack.length})</button>
-      </div>
-      <div class="card-title">Database Validation Report</div>
-      <div style="font-size:12px;line-height:1.6;color:var(--muted);">
-        • Total Clubs: <strong>${state.teams.length}</strong> | Total Players: <strong>${state.players.length}</strong><br/>
-        • Duplicate IDs: <strong style="color:${report.duplicateIds ? 'var(--danger)' : 'var(--accent)'};">${report.duplicateIds}</strong><br/>
-        • Clubs Without Goalkeeper: <strong style="color:${report.teamsNoGK.length ? 'var(--warn)' : 'var(--accent)'};">${report.teamsNoGK.length}</strong><br/>
-        • Invalid Ratings (Out of 1–99): <strong>${report.invalidRatings}</strong>
-      </div>
-    </div>
-  `;
-}
-
-function validateDatabase() {
-  const seen = new Set();
-  let duplicateIds = 0;
-  let invalidRatings = 0;
-  state.players.forEach(p => {
-    if (seen.has(p.id)) duplicateIds++;
-    seen.add(p.id);
-    if (p.ovr < 1 || p.ovr > 99) invalidRatings++;
-  });
-  const teamsNoGK = state.teams.filter(t => !state.players.some(p => p.teamId === t.id && p.pos === "GK"));
-  return { duplicateIds, invalidRatings, teamsNoGK };
-}
-
-function createNewBlankDatabase() {
-  pushUndoSnapshot();
-  state = buildStarterDatabase();
-  state.meta.dbName = "Custom Database " + new Date().toLocaleDateString();
-  saveState();
-  renderApp();
-}
-
-function createBackupVersion() {
-  state.backups = state.backups || [];
-  state.backups.push({ date: new Date().toLocaleTimeString(), teams: state.teams.length, players: state.players.length });
-  saveState();
-  alert("Database version backup saved!");
-  renderApp();
-}
-
-function undoEditor() {
-  if (!undoStack.length) return;
-  redoStack.push(JSON.stringify(state));
-  state = JSON.parse(undoStack.pop());
-  saveState();
-  renderApp();
-}
-
-function redoEditor() {
-  if (!redoStack.length) return;
-  undoStack.push(JSON.stringify(state));
-  state = JSON.parse(redoStack.pop());
-  saveState();
-  renderApp();
-}
-
-/* TEAMS EDITOR (WITH 2D FLAT CREST PREVIEW - NO SHADOWS) */
-function renderEditorTeams() {
-  const t = state.teams.find(x => x.id === selectedTeamId) || state.teams[0];
-  selectedTeamId = t.id;
-  return `
-    <div class="card">
-      <div class="row-between">
-        <div class="card-title">Teams & 2D Kit/Crest Editor</div>
-        <button class="btn" onclick="editorAddTeam()">+ Add Club</button>
-      </div>
-      <select onchange="selectedTeamId=this.value;renderApp();">
-        ${state.teams.map(tm => `<option value="${tm.id}" ${tm.id === t.id ? 'selected' : ''}>${tm.name} (${tm.shortName})</option>`).join("")}
-      </select>
-      <div style="text-align:center;padding:10px;background:var(--card-alt);border-radius:10px;margin-bottom:10px;">
-        ${render2DCrestSVG(t, 64)}
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">2D Flat Vector Crest Preview (No Shadows)</div>
-      </div>
+    <!-- STADIUM & FACILITIES -->
+    <div class="fm-card">
+      <div class="fm-card-header">STADIUM & FACILITIES</div>
       <div class="grid-2">
-        <div><label>Club Name</label><input value="${t.name}" onchange="pushUndoSnapshot();getTeamById('${t.id}').name=this.value;saveState();renderApp();" /></div>
-        <div><label>Short Name (3 chars)</label><input maxlength="3" value="${t.shortName}" onchange="pushUndoSnapshot();getTeamById('${t.id}').shortName=this.value.toUpperCase();saveState();renderApp();" /></div>
-        <div><label>Primary Color</label><input type="color" value="${t.primaryColor}" onchange="pushUndoSnapshot();getTeamById('${t.id}').primaryColor=this.value;saveState();renderApp();" /></div>
-        <div><label>Secondary Color</label><input type="color" value="${t.secondaryColor}" onchange="pushUndoSnapshot();getTeamById('${t.id}').secondaryColor=this.value;saveState();renderApp();" /></div>
-        <div><label>Kit Pattern</label>
-          <select onchange="pushUndoSnapshot();getTeamById('${t.id}').kitPattern=this.value;saveState();renderApp();">
-            ${["stripes", "sash", "hoops"].map(kp => `<option value="${kp}" ${t.kitPattern === kp ? 'selected' : ''}>${kp}</option>`).join("")}
-          </select>
+        <div style="border-right:1px solid #334155;padding-right:8px;">
+          <div style="font-size:11px;color:var(--text-muted);">STADIUM 🏟️</div>
+          <div style="font-size:16px;font-weight:900;margin:4px 0;">${club.stadium.toUpperCase()}</div>
+          <div style="font-size:12px;color:#cbd5e1;">Capacity: ${club.capacity.toLocaleString()}</div>
         </div>
-        <div><label>Transfer Budget</label><input type="number" value="${t.budget}" onchange="pushUndoSnapshot();getTeamById('${t.id}').budget=Number(this.value);saveState();renderApp();" /></div>
-        <div><label>Stadium Name</label><input value="${t.stadiumName}" onchange="pushUndoSnapshot();getTeamById('${t.id}').stadiumName=this.value;saveState();" /></div>
-        <div><label>Reputation (1-99)</label><input type="number" value="${t.reputation}" onchange="pushUndoSnapshot();getTeamById('${t.id}').reputation=Number(this.value);saveState();" /></div>
+        <div style="padding-left:6px;">
+          <div style="font-size:11px;color:var(--text-muted);">FACILITIES</div>
+          <div style="font-size:12px;font-weight:700;margin-top:2px;">Youth Academy</div>
+          <div style="color:var(--neon-cyan);font-size:13px;">★★★★☆</div>
+          <div style="font-size:12px;font-weight:700;margin-top:4px;">Training Ground</div>
+          <div style="color:var(--neon-cyan);font-size:13px;">★★★★☆</div>
+        </div>
       </div>
-      <button class="btn btn-sec btn-block" onclick="pickGalleryImageForTeam('${t.id}')">🖼️ Pick Custom 2D Logo from Phone Gallery</button>
-      <button class="btn btn-danger btn-block" onclick="editorDeleteTeam('${t.id}')">🗑️ Delete Club</button>
     </div>
-  `;
-}
 
-function editorAddTeam() {
-  pushUndoSnapshot();
-  const id = uid("team");
-  state.teams.push({
-    id,
-    name: "New Custom FC",
-    shortName: "NCF",
-    leagueId: "lg_1",
-    country: "England",
-    primaryColor: "#10b981",
-    secondaryColor: "#0f172a",
-    kitPattern: "stripes",
-    stadiumName: "Custom Park",
-    stadiumCapacity: 25000,
-    budget: 20000000,
-    wageBudget: 400000,
-    reputation: 75,
-    rivals: "",
-    customLogoData: null,
-    facilitiesLevel: 3,
-    youthLevel: 3,
-    lineup: [],
-    bench: [],
-    tactics: { formation: "4-3-3", mentality: "Balanced", pressing: "High", width: "Wide", tempo: "Fast", savedPresets: [] },
-    training: { focus: "Balanced", intensity: "Medium" },
-    financesHistory: [100000, 200000, 150000, 300000, 250000, 400000, 100000, 200000, 300000, 250000, 100000, 300000],
-    sponsorIncome: 8000000,
-    stats: { p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, form: [] }
-  });
-  selectedTeamId = id;
-  saveState();
-  renderApp();
-}
-
-function editorDeleteTeam(id) {
-  if (state.teams.length <= 2) return;
-  pushUndoSnapshot();
-  state.teams = state.teams.filter(t => t.id !== id);
-  selectedTeamId = state.teams[0].id;
-  saveState();
-  renderApp();
-}
-
-/* PLAYERS EDITOR WITH LIVE CARD PREVIEW & AUTO OVERALL/VALUE */
-let edPlayerSearch = "";
-function renderEditorPlayers() {
-  const filtered = state.players.filter(p => p.name.toLowerCase().includes(edPlayerSearch.toLowerCase()));
-  const p = state.players.find(x => x.id === selectedPlayerId) || filtered[0] || state.players[0];
-  selectedPlayerId = p.id;
-
-  return `
-    <div class="card">
+    <!-- BOARD CONFIDENCE -->
+    <div class="fm-card">
+      <div class="row-between" style="margin-bottom:6px;">
+        <span style="font-weight:800;font-size:14px;">BOARD CONFIDENCE</span>
+        <span style="font-weight:900;font-size:16px;">${state.boardConfidence}%</span>
+      </div>
       <div class="row-between">
-        <div class="card-title">Players Editor (${state.players.length})</div>
-        <div style="display:flex;gap:4px;">
-          <button class="btn" onclick="editorAddPlayer()">+ New</button>
-          <button class="btn btn-blue" onclick="editorDuplicatePlayer('${p.id}')">Clone</button>
+        <div style="flex:1;height:14px;background:#09111e;border-radius:99px;border:1px solid #334155;overflow:hidden;">
+          <div style="width:${state.boardConfidence}%;height:100%;background:linear-gradient(90deg,#38bdf8,#4ade80);"></div>
         </div>
+        <div style="width:32px;height:32px;border-radius:50%;background:#22c55e;color:#051b11;font-weight:900;display:flex;align-items:center;justify-content:center;">A</div>
       </div>
-      <input placeholder="Filter players..." value="${edPlayerSearch}" oninput="edPlayerSearch=this.value;renderApp();" />
-      <select onchange="selectedPlayerId=this.value;renderApp();">
-        ${filtered.slice(0, 80).map(pl => `<option value="${pl.id}" ${pl.id === p.id ? 'selected' : ''}>${pl.name} (${pl.pos} - OVR ${pl.ovr})</option>`).join("")}
-      </select>
+      <div style="text-align:right;font-size:12px;color:#cbd5e1;margin-top:4px;">Very Secure</div>
+    </div>
 
-      <!-- Live Player Card Preview -->
-      <div class="card" style="background:linear-gradient(135deg,#064e3b,#0f172a);border:2px solid var(--accent);">
-        <div class="row-between">
-          <div>
-            <div style="font-size:22px;font-weight:900;color:var(--accent);">${p.ovr} <span style="font-size:13px;color:#fff;">${p.pos}</span></div>
-            <div style="font-weight:800;font-size:15px;">${p.name}</div>
-            <div style="font-size:11px;color:var(--muted);">${p.nationality} • ${getTeamById(p.teamId).name} • ${formatMoney(p.value)}</div>
-          </div>
-          <div style="font-size:11px;text-align:right;">
-            PAC ${p.attr.pac} | DRI ${p.attr.dri}<br/>
-            SHO ${p.attr.sho} | DEF ${p.attr.def}<br/>
-            PAS ${p.attr.pas} | PHY ${p.attr.phy}
-          </div>
-        </div>
-      </div>
-
+    <!-- KIT PREVIEW (2D FLAT) & TROPHY CABINET -->
+    <div class="fm-card">
       <div class="grid-2">
-        <div><label>Name</label><input value="${p.name}" onchange="updatePlayerField('${p.id}','name',this.value)" /></div>
-        <div><label>Position</label>
-          <select onchange="updatePlayerField('${p.id}','pos',this.value)">
-            ${["GK", "DEF", "MID", "FWD"].map(pos => `<option value="${pos}" ${p.pos === pos ? 'selected' : ''}>${pos}</option>`).join("")}
-          </select>
+        <div style="border-right:1px solid #334155;padding-right:8px;text-align:center;">
+          <div class="fm-card-header">KIT PREVIEW</div>
+          <div class="row-between" style="justify-content:space-around;margin-top:10px;">
+            <div>
+              ${render2DKit(club.c1, club.c2, "", 56)}
+              <div style="font-size:11px;margin-top:4px;">Home</div>
+            </div>
+            <div>
+              ${render2DKit("#f8fafc", "#111827", "", 56)}
+              <div style="font-size:11px;margin-top:4px;">Away</div>
+            </div>
+          </div>
         </div>
-        <div><label>Age</label><input type="number" value="${p.age}" onchange="updatePlayerField('${p.id}','age',Number(this.value))" /></div>
-        <div><label>Potential (1-99)</label><input type="number" value="${p.pot}" onchange="updatePlayerField('${p.id}','pot',Number(this.value))" /></div>
-        <div><label>Pace (${p.attr.pac})</label><input type="number" value="${p.attr.pac}" onchange="updatePlayerAttr('${p.id}','pac',Number(this.value))" /></div>
-        <div><label>Shooting (${p.attr.sho})</label><input type="number" value="${p.attr.sho}" onchange="updatePlayerAttr('${p.id}','sho',Number(this.value))" /></div>
-        <div><label>Passing (${p.attr.pas})</label><input type="number" value="${p.attr.pas}" onchange="updatePlayerAttr('${p.id}','pas',Number(this.value))" /></div>
-        <div><label>Dribbling (${p.attr.dri})</label><input type="number" value="${p.attr.dri}" onchange="updatePlayerAttr('${p.id}','dri',Number(this.value))" /></div>
-        <div><label>Defending (${p.attr.def})</label><input type="number" value="${p.attr.def}" onchange="updatePlayerAttr('${p.id}','def',Number(this.value))" /></div>
-        <div><label>Physical (${p.attr.phy})</label><input type="number" value="${p.attr.phy}" onchange="updatePlayerAttr('${p.id}','phy',Number(this.value))" /></div>
+        <div style="padding-left:6px;">
+          <div class="fm-card-header">TROPHY CABINET</div>
+          <div style="font-size:12px;line-height:2;">
+            🏆 <strong>x${club.trophiesLeague}</strong> <span style="font-size:10px;color:var(--text-muted);">Domestic Leagues</span><br/>
+            🏆 <strong>x${club.trophiesCont}</strong> <span style="font-size:10px;color:var(--text-muted);">Continental Cups</span><br/>
+            🏆 <strong>x${club.trophiesCup}</strong> <span style="font-size:10px;color:var(--text-muted);">Domestic Cups</span>
+          </div>
+        </div>
       </div>
-      <button class="btn btn-danger btn-block" onclick="editorDeletePlayer('${p.id}')">🗑️ Delete Player</button>
+    </div>
+
+    <div class="cta-btn" onclick="navigate('menu','new_game')">
+      <span>SWITCH / MANAGE ANY CLUB ⟫</span>
     </div>
   `;
 }
 
-function updatePlayerField(id, field, val) {
-  pushUndoSnapshot();
-  const p = state.players.find(x => x.id === id);
-  if (!p) return;
-  p[field] = val;
-  p.ovr = calcPlayerOverall(p.attr, p.pos);
-  p.value = calcMarketValue(p.ovr, p.age, p.pot);
-  saveState();
-  renderApp();
-}
-
-function updatePlayerAttr(id, attrKey, val) {
-  pushUndoSnapshot();
-  const p = state.players.find(x => x.id === id);
-  if (!p) return;
-  p.attr[attrKey] = Math.min(99, Math.max(1, val));
-  p.ovr = calcPlayerOverall(p.attr, p.pos);
-  p.value = calcMarketValue(p.ovr, p.age, p.pot);
-  saveState();
-  renderApp();
-}
-
-function editorAddPlayer() {
-  pushUndoSnapshot();
-  const p = generatePlayer(getUserTeam().id, "FWD", "Algeria", 5);
-  state.players.unshift(p);
-  selectedPlayerId = p.id;
-  saveState();
-  renderApp();
-}
-
-function editorDuplicatePlayer(id) {
-  pushUndoSnapshot();
-  const orig = state.players.find(x => x.id === id);
-  if (!orig) return;
-  const copy = JSON.parse(JSON.stringify(orig));
-  copy.id = uid("ply");
-  copy.name = orig.name + " II";
-  state.players.unshift(copy);
-  selectedPlayerId = copy.id;
-  saveState();
-  renderApp();
-}
-
-function editorDeletePlayer(id) {
-  pushUndoSnapshot();
-  state.players = state.players.filter(p => p.id !== id);
-  selectedPlayerId = state.players[0] ? state.players[0].id : null;
-  saveState();
-  renderApp();
-}
-
-/* LEAGUES, RULES & FIXTURES GENERATOR */
-function renderEditorLeaguesRules() {
+/* ============================================================================
+   INBOX & LIVE MATCH ENGINE
+   ============================================================================ */
+function renderInboxScreen() {
   return `
-    <div class="card">
-      <div class="card-title">Leagues, Rules & Schedule Generator</div>
-      ${state.leagues.map(l => `
-        <div class="card" style="background:var(--card-alt);">
-          <label>League Name</label>
-          <input value="${l.name}" onchange="l.name=this.value;saveState();" />
-          <div class="grid-2">
-            <div><label>Promo Spots</label><input type="number" value="${l.promoSpots}" onchange="l.promoSpots=Number(this.value);saveState();" /></div>
-            <div><label>Relegation Spots</label><input type="number" value="${l.relSpots}" onchange="l.relSpots=Number(this.value);saveState();" /></div>
+    <div class="fm-card">
+      <div class="fm-card-header">Club Communications & Scout Reports</div>
+      ${state.inbox.map(m => `
+        <div class="fm-subbox" onclick="m.unread=false;saveGame();render();">
+          <div class="row-between">
+            <span class="pos-tag pos-MID">${m.type} • Wk ${m.week}</span>
+            <button class="sm-btn" onclick="navigate('squad','market')">Open Market</button>
           </div>
+          <div style="font-weight:800;font-size:13px;margin:6px 0 3px;">${m.title}</div>
+          <div style="font-size:12px;color:var(--text-muted);">${m.body}</div>
         </div>
       `).join("")}
-      <button class="btn btn-block" onclick="regenerateAllSchedules()">🔄 Auto-Generate Round-Robin Schedules</button>
     </div>
   `;
 }
 
-function regenerateAllSchedules() {
-  const lg1Ids = state.teams.filter(t => t.leagueId === "lg_1").map(t => t.id);
-  const lg2Ids = state.teams.filter(t => t.leagueId === "lg_2").map(t => t.id);
-  state.fixtures = [
-    ...generateRoundRobinFixtures(lg1Ids, "lg_1"),
-    ...generateRoundRobinFixtures(lg2Ids, "lg_2")
-  ];
-  saveState();
-  alert("New round-robin schedules generated for all leagues!");
-}
-
-/* MEDIA MANAGER (GALLERY PICKER + AUTO-MATCH BY FILENAME) */
-function renderEditorMedia() {
-  return `
-    <div class="card">
-      <div class="card-title">Media Manager (Phone Gallery & Auto-Match)</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">
-        Pick images from your phone gallery for club logos, player faces, kits, trophies, or stadiums. If a filename matches a Club Short Name (e.g., <code>NLR.png</code>) or ID, it auto-assigns!
-      </div>
-      <button class="btn btn-block" onclick="triggerMediaUpload()">📱 Pick Image(s) from Phone Gallery</button>
-    </div>
-  `;
-}
-
-function pickGalleryImageForTeam(teamId) {
-  const inp = document.getElementById("hidden-file-input");
-  inp.accept = "image/*";
-  inp.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const t = getTeamById(teamId);
-      if (t) t.customLogoData = reader.result;
-      saveState();
-      renderApp();
-    };
-    reader.readAsDataURL(file);
-  };
-  inp.click();
-}
-
-function triggerMediaUpload() {
-  const inp = document.getElementById("hidden-file-input");
-  inp.accept = "image/*";
-  inp.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const baseName = file.name.split(".")[0].toUpperCase();
-    const reader = new FileReader();
-    reader.onload = () => {
-      const matchedTeam = state.teams.find(t => t.shortName.toUpperCase() === baseName || t.id.toUpperCase() === baseName);
-      if (matchedTeam) {
-        matchedTeam.customLogoData = reader.result;
-        alert(`Auto-matched logo to ${matchedTeam.name}!`);
-      } else {
-        getUserTeam().customLogoData = reader.result;
-        alert(`Assigned uploaded image to ${getUserTeam().name}!`);
-      }
-      saveState();
-      renderApp();
-    };
-    reader.readAsDataURL(file);
-  };
-  inp.click();
-}
-
-/* IMPORT / EXPORT WIZARD (JSON & CSV) */
-function renderEditorImportExport() {
-  return `
-    <div class="card">
-      <div class="card-title">Import / Export Database Wizard</div>
-      <button class="btn btn-block" onclick="exportDatabaseJSON()">⬇️ Export Full Database (.JSON)</button>
-      <button class="btn btn-blue btn-block" onclick="exportPlayersCSV()">⬇️ Export Players Spreadsheet (.CSV)</button>
-      <button class="btn btn-sec btn-block" onclick="importDatabaseFile()">⬆️ Import JSON / CSV Database File</button>
-    </div>
-  `;
-}
-
-function exportDatabaseJSON() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "fm26_database.json";
-  a.click();
-}
-
-function exportPlayersCSV() {
-  const rows = ["id,name,pos,age,nationality,ovr,pot,value,teamId"];
-  state.players.forEach(p => {
-    rows.push(`${p.id},"${p.name}",${p.pos},${p.age},${p.nationality},${p.ovr},${p.pot},${p.value},${p.teamId}`);
-  });
-  const blob = new Blob([rows.join("\n")], { type: "text/csv" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "fm26_players.csv";
-  a.click();
-}
-
-function importDatabaseFile() {
-  const inp = document.getElementById("hidden-file-input");
-  inp.accept = ".json,.csv";
-  inp.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        if (file.name.endsWith(".json")) {
-          state = JSON.parse(reader.result);
-          saveState();
-          renderApp();
-          alert("Full JSON Database imported!");
-        } else {
-          const lines = reader.result.split("\n").slice(1);
-          lines.forEach(line => {
-            const cols = line.split(",");
-            if (cols.length >= 6) {
-              state.players.push(generatePlayer(getUserTeam().id, cols[2] || "MID", cols[4] || "England", 4));
-            }
-          });
-          saveState();
-          renderApp();
-          alert("CSV Players imported!");
-        }
-      } catch (err) {
-        alert("Invalid file format.");
-      }
-    };
-    reader.readAsText(file);
-  };
-  inp.click();
-}
-
-/* EXTRAS: BULK RATING SCALING & RANDOM GENERATOR */
-function renderEditorExtras() {
-  return `
-    <div class="card">
-      <div class="card-title">Bulk Tools & Random Generators</div>
-      <button class="btn btn-block" onclick="bulkScaleRatings(5)">⚡ Bulk Scale All Players +5 OVR</button>
-      <button class="btn btn-sec btn-block" onclick="bulkScaleRatings(-5)">📉 Bulk Scale All Players -5 OVR</button>
-      <button class="btn btn-blue btn-block" onclick="generateBatchRandomPlayers(20)">🎲 Generate 20 Random Free Agents</button>
-    </div>
-  `;
-}
-
-function bulkScaleRatings(delta) {
-  pushUndoSnapshot();
-  state.players.forEach(p => {
-    Object.keys(p.attr).forEach(k => {
-      p.attr[k] = Math.min(99, Math.max(1, p.attr[k] + delta));
-    });
-    p.ovr = calcPlayerOverall(p.attr, p.pos);
-    p.pot = Math.min(99, Math.max(p.ovr, p.pot + delta));
-    p.value = calcMarketValue(p.ovr, p.age, p.pot);
-  });
-  saveState();
-  renderApp();
-}
-
-function generateBatchRandomPlayers(count) {
-  pushUndoSnapshot();
-  for (let i = 0; i < count; i++) {
-    state.players.push(generatePlayer("FREE", pick(["GK", "DEF", "MID", "FWD"]), pick(Object.keys(FAKE_NAMES)), rInt(-3, 8)));
+function launchLiveMatch() {
+  const club = getUserClub();
+  const fix = state.fixtures.find(f => !f.played && (f.homeId === club.id || f.awayId === club.id));
+  if (!fix) {
+    advanceWorldWeek();
+    return;
   }
-  saveState();
-  renderApp();
+  const h = getClub(fix.homeId);
+  const a = getClub(fix.awayId);
+  liveMatchObj = {
+    fixId: fix.id,
+    min: 0,
+    h,
+    a,
+    hg: 0,
+    ag: 0,
+    ballX: 50,
+    ballY: 50,
+    logs: ["1' Kick-off! Under the floodlights, a massive clash begins!"]
+  };
+  currentTab = "schedule";
+  currentSub = "live_match";
+  render();
+
+  if (liveMatchInterval) clearInterval(liveMatchInterval);
+  liveMatchInterval = setInterval(() => {
+    if (!liveMatchObj) return;
+    liveMatchObj.min += 3;
+    liveMatchObj.ballX = rInt(18, 82);
+    liveMatchObj.ballY = rInt(18, 82);
+
+    if (Math.random() < 0.24) {
+      const homeScores = Math.random() * (liveMatchObj.h.rep + liveMatchObj.a.rep) < (liveMatchObj.h.rep + 3);
+      const scoringClub = homeScores ? liveMatchObj.h : liveMatchObj.a;
+      const scorer = pick(getClubPlayers(scoringClub.id).filter(p => p.pos !== "GK")) || { name: "Forward" };
+      if (Math.random() < 0.36) {
+        if (homeScores) liveMatchObj.hg++; else liveMatchObj.ag++;
+        scorer.goals = (scorer.goals || 0) + 1;
+        liveMatchObj.logs.unshift(`⚽ ${liveMatchObj.min}' GOAL! ${scorer.name} strikes into the top corner for ${scoringClub.name}!`);
+      } else {
+        liveMatchObj.logs.unshift(`🧤 ${liveMatchObj.min}' Great chance for ${scorer.name} (${scoringClub.short}), parried away!`);
+      }
+    }
+
+    if (liveMatchObj.min >= 90) {
+      clearInterval(liveMatchInterval);
+      fix.played = true;
+      fix.hg = liveMatchObj.hg;
+      fix.ag = liveMatchObj.ag;
+      recordResultInStandings(liveMatchObj.h, liveMatchObj.a, fix.hg, fix.ag);
+      simulateWeekFixtures(state, state.week);
+      state.week++;
+      saveGame();
+      liveMatchObj.logs.unshift(`🏁 90' FULL TIME: ${liveMatchObj.h.name} ${liveMatchObj.hg} - ${liveMatchObj.ag} ${liveMatchObj.a.name}`);
+    }
+    if (currentSub === "live_match") render();
+  }, 240);
+}
+
+function renderLiveMatchScreen() {
+  if (!liveMatchObj) return renderMatchesFixturesScreen();
+  return `
+    <div class="fm-card" style="text-align:center;">
+      <div class="row-between">
+        <div>${render2DCrest(liveMatchObj.h, 36)}<div style="font-weight:800;font-size:12px;">${liveMatchObj.h.name}</div></div>
+        <div style="font-size:26px;font-weight:900;color:var(--neon-cyan);">${liveMatchObj.hg} - ${liveMatchObj.ag}<div style="font-size:12px;color:#facc15;">${liveMatchObj.min}'</div></div>
+        <div>${render2DCrest(liveMatchObj.a, 36)}<div style="font-weight:800;font-size:12px;">${liveMatchObj.a.name}</div></div>
+      </div>
+      <div class="pitch-container" style="height:175px;margin-top:10px;">
+        <div class="pitch-mid"></div>
+        <div class="pitch-circle"></div>
+        <div style="position:absolute;left:${liveMatchObj.ballX}%;top:${liveMatchObj.ballY}%;transform:translate(-50%,-50%);font-size:16px;">⚽</div>
+      </div>
+      <div style="max-height:160px;overflow-y:auto;text-align:left;font-size:12px;background:#08101d;padding:8px;border-radius:8px;">
+        ${liveMatchObj.logs.map(l => `<div style="padding:3px 0;border-bottom:1px solid #1e293b;">${l}</div>`).join("")}
+      </div>
+    </div>
+    <div class="cta-btn" onclick="viewedCompetitionId=getUserClub().leagueId;currentSub='table';render();">
+      <span>VIEW UPDATED LEAGUE TABLE ⟫</span>
+    </div>
+  `;
+}
+
+function advanceWorldWeek() {
+  simulateWeekFixtures(state, state.week);
+  state.week++;
+  saveGame();
+  render();
+}
+
+/* ============================================================================
+   BUILT-IN DATABASE EDITOR (CLUBS, PLAYERS, 2D LOGOS, IMPORT/EXPORT)
+   ============================================================================ */
+let edClubId = null;
+let edPlayerId = null;
+
+function renderEditorHomeScreen() {
+  return `
+    <div class="fm-card">
+      <div class="fm-card-header">Built-In World Database Studio</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">
+        • Active Leagues: <strong>${state.leagues.length} Real-Size Leagues</strong><br/>
+        • Active Clubs: <strong>${state.clubs.length} Clubs</strong> (20 EPL, 24 Championship, 20 La Liga, 20 Serie A, 18 Bundesliga, 18 Ligue 1, 16 Algerian Ligue 1, 20 Brasileirão)<br/>
+        • Total Players: <strong>${state.players.length} Players</strong>
+      </div>
+      <div class="grid-2">
+        <button class="sm-btn" style="padding:10px;" onclick="currentSub='ed_clubs';render();">🛡️ Edit Clubs & 2D Logos</button>
+        <button class="sm-btn" style="padding:10px;" onclick="currentSub='ed_players';render();">👟 Edit Players</button>
+        <button class="sm-btn sec" style="padding:10px;" onclick="exportWorldJSON()">⬇️ Export JSON DB</button>
+        <button class="sm-btn sec" style="padding:10px;" onclick="importWorldJSON()">⬆️ Import JSON DB</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderEditorClubsScreen() {
+  const c = state.clubs.find(x => x.id === edClubId) || getUserClub();
+  edClubId = c.id;
+  return `
+    <div class="fm-card">
+      <div class="fm-card-header">Club & 2D Flat Crest Editor (No Shadows)</div>
+      <select onchange="edClubId=this.value;render();">
+        ${state.clubs.map(cl => `<option value="${cl.id}" ${cl.id === c.id ? 'selected' : ''}>${cl.name} (${cl.short})</option>`).join("")}
+      </select>
+      <div style="text-align:center;padding:10px;background:#091220;border-radius:10px;margin-bottom:10px;">
+        ${render2DCrest(c, 64)}
+        ${render2DKit(c.c1, c.c2, "10", 64)}
+      </div>
+      <div class="grid-2">
+        <div><label style="font-size:11px;">Club Name</label><input value="${c.name}" onchange="c.name=this.value;saveGame();render();" /></div>
+        <div><label style="font-size:11px;">Short (3 chars)</label><input maxlength="3" value="${c.short}" onchange="c.short=this.value.toUpperCase();saveGame();render();" /></div>
+        <div><label style="font-size:11px;">Primary Color</label><input type="color" value="${c.c1}" onchange="c.c1=this.value;saveGame();render();" /></div>
+        <div><label style="font-size:11px;">Secondary Color</label><input type="color" value="${c.c2}" onchange="c.c2=this.value;saveGame();render();" /></div>
+        <div><label style="font-size:11px;">Transfer Budget</label><input type="number" value="${c.budget}" onchange="c.budget=Number(this.value);saveGame();render();" /></div>
+        <div><label style="font-size:11px;">Reputation (1-99)</label><input type="number" value="${c.rep}" onchange="c.rep=Number(this.value);saveGame();render();" /></div>
+      </div>
+      <button class="sm-btn" style="width:100%;padding:10px;" onclick="uploadCustom2DLogo('${c.id}')">🖼️ Pick 2D Club Logo from Phone Gallery</button>
+    </div>
+  `;
+}
+
+function uploadCustom2DLogo(cid) {
+  const inp = document.getElementById("hidden-file-picker");
+  inp.accept = "image/*";
+  inp.onchange = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      const cl = getClub(cid);
+      if (cl) cl.customLogo = r.result;
+      saveGame();
+      render();
+    };
+    r.readAsDataURL(f);
+  };
+  inp.click();
+}
+
+function renderEditorPlayersScreen() {
+  const p = state.players.find(x => x.id === edPlayerId) || state.players[0];
+  edPlayerId = p.id;
+  return `
+    <div class="fm-card">
+      <div class="fm-card-header">Player Attributes & Bio Editor</div>
+      <select onchange="edPlayerId=this.value;render();">
+        ${state.players.slice(0, 120).map(pl => `<option value="${pl.id}" ${pl.id === p.id ? 'selected' : ''}>${pl.name} (${pl.pos} • OVR ${pl.ovr})</option>`).join("")}
+      </select>
+      <div class="grid-2">
+        <div><label style="font-size:11px;">Player Name</label><input value="${p.name}" onchange="p.name=this.value;saveGame();render();" /></div>
+        <div><label style="font-size:11px;">Position</label><input value="${p.pos}" onchange="p.pos=this.value.toUpperCase();saveGame();render();" /></div>
+        <div><label style="font-size:11px;">Overall (1-99)</label><input type="number" value="${p.ovr}" onchange="p.ovr=Number(this.value);saveGame();render();" /></div>
+        <div><label style="font-size:11px;">Market Value</label><input type="number" value="${p.value}" onchange="p.value=Number(this.value);saveGame();render();" /></div>
+      </div>
+    </div>
+  `;
+}
+
+function exportWorldJSON() {
+  const blob = new Blob([JSON.stringify(state)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "fm26_world_database.json";
+  a.click();
+}
+
+function importWorldJSON() {
+  const inp = document.getElementById("hidden-file-picker");
+  inp.accept = ".json";
+  inp.onchange = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        state = JSON.parse(r.result);
+        saveGame();
+        render();
+        alert("World database imported!");
+      } catch (err) {
+        alert("Invalid JSON file.");
+      }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  renderApp();
+  currentTab = "menu";
+  currentSub = "main_menu";
+  render();
 });
